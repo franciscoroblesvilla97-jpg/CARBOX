@@ -1,0 +1,275 @@
+datasource db {
+  provider = "sqlite" // cambiar a "postgresql" en producción
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Rol {
+  ADMIN
+  EMPLEADO
+}
+
+enum EstadoOrden {
+  PENDIENTE
+  EN_PROGRESO
+  COMPLETADA
+  CANCELADA
+}
+
+enum EstadoSolicitud {
+  PENDIENTE
+  CONFIRMADA
+  RECHAZADA
+}
+
+enum EstadoCotizacion {
+  PENDIENTE
+  APROBADA
+  RECHAZADA
+}
+
+enum CategoriaProducto {
+  ACEITES_LUBRICANTES
+  NEUMATICOS
+  FRENOS
+  FILTROS
+  LUCES
+  OTRO
+}
+
+enum TipoMovimientoInventario {
+  ENTRADA
+  SALIDA
+  AJUSTE
+}
+
+model Usuario {
+  id                  String                 @id @default(cuid())
+  nombre              String
+  email               String                 @unique
+  passwordHash        String
+  rol                 Rol                    @default(EMPLEADO)
+  activo              Boolean                @default(true)
+  createdAt           DateTime               @default(now())
+  ordenesCreadas      OrdenTrabajo[]         @relation("CreadaPor")
+  cotizacionesCreadas Cotizacion[]           @relation("CotizacionCreadaPor")
+  movimientos         MovimientoInventario[]
+}
+
+model Cliente {
+  id           String                  @id @default(cuid())
+  nombre       String
+  telefono     String
+  email        String?
+  rut          String?                 @unique
+  createdAt    DateTime                @default(now())
+  vehiculos    Vehiculo[]
+  solicitudes  SolicitudAgendamiento[]
+  cotizaciones Cotizacion[]
+}
+
+model Vehiculo {
+  id           String                  @id @default(cuid())
+  patente      String                  @unique
+  marca        String?
+  modelo       String?
+  anio         Int?
+  clienteId    String
+  cliente      Cliente                 @relation(fields: [clienteId], references: [id])
+  createdAt    DateTime                @default(now())
+  ordenes      OrdenTrabajo[]
+  solicitudes  SolicitudAgendamiento[]
+  cotizaciones Cotizacion[]
+}
+
+model Producto {
+  id               String                 @id @default(cuid())
+  nombre           String
+  sku              String?                @unique
+  categoria        CategoriaProducto      @default(OTRO)
+  unidad           String                 @default("unidad") // ej: litro, unidad, juego
+  precioVenta      Decimal                @default(0)
+  costoUnitario    Decimal                @default(0)
+  stockActual      Int                    @default(0)
+  stockMinimo      Int                    @default(0) // umbral de alerta bajo stock
+  createdAt        DateTime               @default(now())
+  lineasOrden      OrdenTrabajoProducto[]
+  lineasCotizacion CotizacionProducto[]
+  movimientos      MovimientoInventario[]
+}
+
+model Servicio {
+  id               String                 @id @default(cuid())
+  nombre           String // "Cambio de aceite", "Alineación", etc.
+  descripcion      String?
+  precioBase       Decimal
+  duracionMinutos  Int                    @default(0) // tiempo estimado para programar la jornada
+  activo           Boolean                @default(true)
+  lineasOrden      OrdenTrabajoServicio[]
+  lineasCotizacion CotizacionServicio[]
+  puestos          Puesto[]               @relation("PuestoServicios")
+}
+
+model Trabajador {
+  id        String         @id @default(cuid())
+  nombre    String
+  activo    Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  ordenes   OrdenTrabajo[]
+}
+
+model Puesto {
+  id        String         @id @default(cuid())
+  nombre    String
+  activo    Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  servicios Servicio[]     @relation("PuestoServicios") // servicios que este puesto puede realizar
+  ordenes   OrdenTrabajo[]
+}
+
+model OrdenTrabajo {
+  id                 String                 @id @default(cuid())
+  numero             Int                    @unique
+  vehiculoId         String
+  vehiculo           Vehiculo               @relation(fields: [vehiculoId], references: [id])
+  estado             EstadoOrden            @default(PENDIENTE)
+  observaciones      String?
+  creadoPorId        String
+  creadoPor          Usuario                @relation("CreadaPor", fields: [creadoPorId], references: [id])
+  trabajadorId       String?
+  trabajador         Trabajador?            @relation(fields: [trabajadorId], references: [id])
+  puestoId           String?
+  puesto             Puesto?                @relation(fields: [puestoId], references: [id])
+  solicitudOrigenId  String?                @unique
+  solicitudOrigen    SolicitudAgendamiento? @relation(fields: [solicitudOrigenId], references: [id])
+  cotizacionOrigenId String?                @unique
+  cotizacionOrigen   Cotizacion?            @relation(fields: [cotizacionOrigenId], references: [id])
+  fechaIngreso       DateTime               @default(now())
+  fechaProgramada    DateTime               @default(now())
+  fechaCierre        DateTime?
+  servicios          OrdenTrabajoServicio[]
+  productos          OrdenTrabajoProducto[]
+}
+
+model OrdenTrabajoServicio {
+  id                  String       @id @default(cuid())
+  ordenTrabajoId      String
+  ordenTrabajo        OrdenTrabajo @relation(fields: [ordenTrabajoId], references: [id], onDelete: Cascade)
+  servicioId          String?
+  servicio            Servicio?    @relation(fields: [servicioId], references: [id])
+  nombrePersonalizado String? // servicio "tipo n" que no está en el catálogo
+  precioCobrado       Decimal // snapshot del precio al momento de cobrar
+  cantidad            Int          @default(1)
+}
+
+model OrdenTrabajoProducto {
+  id                  String       @id @default(cuid())
+  ordenTrabajoId      String
+  ordenTrabajo        OrdenTrabajo @relation(fields: [ordenTrabajoId], references: [id], onDelete: Cascade)
+  productoId          String?
+  producto            Producto?    @relation(fields: [productoId], references: [id])
+  nombrePersonalizado String? // material "tipo n" externo, comprado puntualmente y no controlado en inventario
+  cantidad            Int
+  precioUnitario      Decimal // snapshot del precio de venta al momento de usarlo
+  costoUnitario       Decimal      @default(0) // snapshot del costo al momento de usarlo, para calcular el gasto/margen
+}
+
+model SolicitudAgendamiento {
+  id             String          @id @default(cuid())
+  nombreContacto String
+  telefono       String
+  email          String?
+  patente        String
+  marca          String?
+  modelo         String?
+  anio           Int?
+  clienteId      String?
+  cliente        Cliente?        @relation(fields: [clienteId], references: [id])
+  vehiculoId     String?
+  vehiculo       Vehiculo?       @relation(fields: [vehiculoId], references: [id])
+  servicioTexto  String // lo que el visitante describe/selecciona
+  fechaPreferida DateTime
+  comentario     String?
+  estado         EstadoSolicitud @default(PENDIENTE)
+  createdAt      DateTime        @default(now())
+  ordenGenerada  OrdenTrabajo?
+}
+
+model Cotizacion {
+  id            String               @id @default(cuid())
+  numero        Int                  @unique
+  nombreCliente String
+  telefono      String?
+  email         String?
+  patente       String?
+  marca         String?
+  modelo        String?
+  anio          Int?
+  clienteId     String?
+  cliente       Cliente?             @relation(fields: [clienteId], references: [id])
+  vehiculoId    String?
+  vehiculo      Vehiculo?            @relation(fields: [vehiculoId], references: [id])
+  estado        EstadoCotizacion     @default(PENDIENTE)
+  observaciones String?
+  creadoPorId   String
+  creadoPor     Usuario              @relation("CotizacionCreadaPor", fields: [creadoPorId], references: [id])
+  createdAt     DateTime             @default(now())
+  servicios     CotizacionServicio[]
+  productos     CotizacionProducto[]
+  ordenGenerada OrdenTrabajo?
+}
+
+model CotizacionServicio {
+  id                  String     @id @default(cuid())
+  cotizacionId        String
+  cotizacion          Cotizacion @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+  servicioId          String?
+  servicio            Servicio?  @relation(fields: [servicioId], references: [id])
+  nombrePersonalizado String?
+  precioCobrado       Decimal
+  cantidad            Int        @default(1)
+}
+
+model CotizacionProducto {
+  id                  String     @id @default(cuid())
+  cotizacionId        String
+  cotizacion          Cotizacion @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+  productoId          String?
+  producto            Producto?  @relation(fields: [productoId], references: [id])
+  nombrePersonalizado String?
+  cantidad            Int
+  precioUnitario      Decimal
+  costoUnitario       Decimal    @default(0)
+}
+
+model EspecificacionVehiculo {
+  id               String   @id @default(cuid())
+  marca            String
+  modelo           String
+  anioDesde        Int?
+  anioHasta        Int?
+  tipoAceite       String?
+  capacidadAceite  String? // ej: "4.5 L"
+  tipoFiltroAceite String?
+  tipoFiltroAire   String?
+  tipoNeumatico    String? // ej: "195/65 R15"
+  notas            String?
+  createdAt        DateTime @default(now())
+}
+
+model MovimientoInventario {
+  id            String                   @id @default(cuid())
+  productoId    String
+  producto      Producto                 @relation(fields: [productoId], references: [id])
+  tipo          TipoMovimientoInventario
+  cantidad      Int // siempre positivo; el "tipo" define el signo lógico
+  costoUnitario Decimal? // costo pagado por unidad en una ENTRADA (compra); no aplica a SALIDA/AJUSTE
+  motivo        String? // "uso en OT-123", "compra proveedor X", "ajuste inventario"
+  fotosUrl      String? // URLs (separadas por coma) de la foto de la guía/factura de respaldo
+  usuarioId     String
+  usuario       Usuario                  @relation(fields: [usuarioId], references: [id])
+  createdAt     DateTime                 @default(now())
+}
