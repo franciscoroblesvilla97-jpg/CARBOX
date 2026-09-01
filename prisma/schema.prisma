@@ -150,6 +150,9 @@ model OrdenTrabajo {
   fechaIngreso       DateTime               @default(now())
   fechaProgramada    DateTime               @default(now())
   fechaCierre        DateTime?
+  tokenPublico       String                 @unique @default(cuid())
+  recordatorioEnviado Boolean               @default(false)
+  confirmadoCliente  Boolean                @default(false)
   servicios          OrdenTrabajoServicio[]
   productos          OrdenTrabajoProducto[]
 }

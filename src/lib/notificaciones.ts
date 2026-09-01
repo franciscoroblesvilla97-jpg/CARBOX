@@ -167,6 +167,39 @@ export async function notificarCotizacionLista(cotizacion: {
   ]);
 }
 
+export async function notificarRecordatorio24h(orden: {
+  numero: number;
+  tokenPublico: string;
+  clienteNombre: string;
+  telefono: string;
+  email: string | null;
+  fechaProgramada: Date;
+}) {
+  const fecha = new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeStyle: "short" }).format(
+    orden.fechaProgramada
+  );
+  const url = `${baseUrl}/reserva/${orden.tokenPublico}`;
+
+  await Promise.all([
+    enviarWhatsAppTemplate(orden.telefono, process.env.WHATSAPP_TEMPLATE_RECORDATORIO || "recordatorio_hora", [
+      orden.clienteNombre,
+      fecha,
+      url,
+    ]),
+    orden.email
+      ? enviarEmail(
+          orden.email,
+          "Recordatorio: tu hora en Carbox es mañana",
+          envoltorioEmail(
+            "¡Te esperamos mañana!",
+            `<p>Hola ${orden.clienteNombre}, te recordamos tu hora agendada para el <strong>${fecha}</strong>.</p>
+             <p><a href="${url}" style="color:#c2410c;">Confirmar o cambiar mi hora →</a></p>`
+          )
+        )
+      : Promise.resolve(),
+  ]);
+}
+
 export async function notificarOrdenCompletada(orden: {
   id: string;
   numero: number;
