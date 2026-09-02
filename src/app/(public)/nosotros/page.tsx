@@ -16,7 +16,7 @@ export default function NosotrosPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="font-bold text-slate-900 mb-1">Dirección</h2>
-            <p className="text-slate-500">Dirección de ejemplo 123, Concepción</p>
+            <p className="text-slate-500">Pedro de Valdivia 525, Concepción</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="font-bold text-slate-900 mb-1">Horario</h2>
@@ -24,11 +24,11 @@ export default function NosotrosPage() {
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="font-bold text-slate-900 mb-1">Teléfono / WhatsApp</h2>
-            <p className="text-slate-500">+56 9 1234 5678</p>
+            <p className="text-slate-500">+56 9 8210 6659</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="font-bold text-slate-900 mb-1">Email</h2>
-            <p className="text-slate-500">contacto@carbox.cl</p>
+            <p className="text-slate-500">contacto@carboxconce.cl</p>
           </div>
         </div>
       </div>

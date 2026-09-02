@@ -75,7 +75,7 @@ function envoltorioEmail(titulo: string, cuerpoHtml: string) {
       <h2 style="font-size: 16px; color: #334155;">${titulo}</h2>
       ${cuerpoHtml}
       <p style="font-size: 12px; color: #94a3b8; margin-top: 24px;">
-        Dirección de ejemplo 123, Concepción · +56 9 1234 5678
+        Pedro de Valdivia 525, Concepción · +56 9 8210 6659
       </p>
     </div>
   `;

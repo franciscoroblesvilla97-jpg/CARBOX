@@ -1,4 +1,4 @@
-const TELEFONO = "+56912345678";
+const TELEFONO = "+56982106659";
 const MENSAJE_WHATSAPP = encodeURIComponent("Hola Carbox, quisiera consultar por un servicio.");
 
 export function ContactBar() {

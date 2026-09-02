@@ -38,8 +38,8 @@ export default async function InformeOrdenPage({
         <div className="flex items-start justify-between border-b border-slate-200 pb-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Carbox</h1>
-            <p className="text-sm text-slate-500">Dirección de ejemplo 123, Concepción</p>
-            <p className="text-sm text-slate-500">+56 9 1234 5678 · contacto@carbox.cl</p>
+            <p className="text-sm text-slate-500">Pedro de Valdivia 525, Concepción</p>
+            <p className="text-sm text-slate-500">+56 9 8210 6659 · contacto@carboxconce.cl</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-semibold text-slate-900">Informe de servicio</p>

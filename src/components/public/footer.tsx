@@ -8,7 +8,7 @@ export function Footer() {
         <p className="text-sm text-slate-400 mb-6">Tu lubricentro de confianza en Concepción.</p>
         <div className="flex flex-col sm:flex-row sm:justify-between gap-2 text-sm text-slate-400 border-t border-slate-800 pt-6">
           <p>© {new Date().getFullYear()} Carbox — Lubricentro</p>
-          <p>Dirección de ejemplo 123, Concepción · +56 9 1234 5678</p>
+          <p>Pedro de Valdivia 525, Concepción · +56 9 8210 6659</p>
         </div>
       </div>
     </footer>
