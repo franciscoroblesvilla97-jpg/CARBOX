@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { notificarRecordatorio24h } from "@/lib/notificaciones";
 
-// Corre cada hora (ver vercel.json). Busca órdenes agendadas entre 23 y 25 horas desde
-// ahora — la ventana de 2h evita huecos entre ejecuciones consecutivas del cron; el flag
-// recordatorioEnviado evita mandar el mismo recordatorio dos veces si una orden cae en
-// la superposición de dos ventanas seguidas.
+// Corre una vez al día (ver vercel.json — el plan Hobby de Vercel no permite crons más
+// frecuentes). La ventana de 12-36h cubre cualquier hora del día siguiente sin importar
+// a qué hora exacta dispare el cron; el flag recordatorioEnviado evita reenvíos si la
+// orden sigue cayendo en la ventana al día siguiente.
 export async function GET(request: NextRequest) {
   if (process.env.CRON_SECRET) {
     const auth = request.headers.get("authorization");
@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
   }
 
   const ahora = new Date();
-  const desde = new Date(ahora.getTime() + 23 * 60 * 60 * 1000);
-  const hasta = new Date(ahora.getTime() + 25 * 60 * 60 * 1000);
+  const desde = new Date(ahora.getTime() + 12 * 60 * 60 * 1000);
+  const hasta = new Date(ahora.getTime() + 36 * 60 * 60 * 1000);
 
   const ordenes = await prisma.ordenTrabajo.findMany({
     where: {
