@@ -91,7 +91,8 @@ export async function crearCotizacion(_prevState: string | undefined, formData: 
   const servicios = await prisma.servicio.findMany({ where: { id: { in: lineasServicio.map((l) => l.servicioId) } } });
   const productos = await prisma.producto.findMany({ where: { id: { in: lineasProducto.map((l) => l.productoId) } } });
 
-  const numero = (await prisma.cotizacion.count()) + 1;
+  const { _max } = await prisma.cotizacion.aggregate({ _max: { numero: true } });
+  const numero = (_max.numero ?? 0) + 1;
 
   const cotizacion = await prisma.cotizacion.create({
     data: {
