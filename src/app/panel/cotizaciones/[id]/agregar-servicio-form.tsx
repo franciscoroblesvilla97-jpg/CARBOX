@@ -10,6 +10,9 @@ export function AgregarServicioForm({ cotizacionId, servicios }: { cotizacionId:
   const action = agregarServicioACotizacion.bind(null, cotizacionId);
   const [error, formAction, pending] = useActionState(action, undefined);
   const [modo, setModo] = useState<"catalogo" | "personalizado">("catalogo");
+  const [servicioId, setServicioId] = useState("");
+
+  const servicioSeleccionado = servicios.find((s) => s.id === servicioId);
 
   return (
     <form action={formAction} className="grid grid-cols-4 gap-3 items-end">
@@ -26,18 +29,37 @@ export function AgregarServicioForm({ cotizacionId, servicios }: { cotizacionId:
       </div>
 
       {modo === "catalogo" ? (
-        <Field label="Servicio">
-          <Select name="servicioId" required defaultValue="">
-            <option value="" disabled>
-              Selecciona un servicio
-            </option>
-            {servicios.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.nombre}
+        <>
+          <Field label="Servicio">
+            <Select
+              name="servicioId"
+              required
+              value={servicioId}
+              onChange={(e) => setServicioId(e.target.value)}
+            >
+              <option value="" disabled>
+                Selecciona un servicio
               </option>
-            ))}
-          </Select>
-        </Field>
+              {servicios.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.nombre}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Precio a cobrar (CLP)">
+            <Input
+              key={servicioId}
+              name="precioCobrado"
+              type="number"
+              min={0}
+              step="1"
+              defaultValue={servicioSeleccionado ? Number(servicioSeleccionado.precioBase) : ""}
+              placeholder="Precio"
+              required
+            />
+          </Field>
+        </>
       ) : (
         <>
           <Field label="Nombre del servicio">

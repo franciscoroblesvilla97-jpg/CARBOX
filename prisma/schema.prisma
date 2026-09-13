@@ -233,6 +233,7 @@ model CotizacionServicio {
   servicio            Servicio?  @relation(fields: [servicioId], references: [id])
   nombrePersonalizado String?
   precioCobrado       Decimal
+  descuento           Decimal    @default(0) // % de descuento aplicado a esta línea (0-100)
   cantidad            Int        @default(1)
 }
 
@@ -246,6 +247,7 @@ model CotizacionProducto {
   cantidad            Int
   precioUnitario      Decimal
   costoUnitario       Decimal    @default(0)
+  descuento           Decimal    @default(0) // % de descuento aplicado a esta línea (0-100)
 }
 
 model EspecificacionVehiculo {

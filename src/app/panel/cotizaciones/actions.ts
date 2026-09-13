@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireSession, requireRole } from "@/lib/permissions";
-import { cotizacionCabeceraSchema } from "@/lib/validations/cotizacion";
+import { cotizacionCabeceraSchema, DESCUENTO_MAXIMO } from "@/lib/validations/cotizacion";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { notificarCotizacionLista } from "@/lib/notificaciones";
@@ -27,6 +27,7 @@ export async function crearCotizacion(_prevState: string | undefined, formData: 
 
   const servicioIds = formData.getAll("servicioId");
   const servicioCantidades = formData.getAll("servicioCantidad");
+  const servicioPrecios = formData.getAll("servicioPrecio");
   const servicioNombresPersonalizados = formData.getAll("servicioNombrePersonalizado");
   const servicioPreciosPersonalizados = formData.getAll("servicioPrecioPersonalizado");
   const servicioCantidadesPersonalizadas = formData.getAll("servicioCantidadPersonalizada");
@@ -38,10 +39,17 @@ export async function crearCotizacion(_prevState: string | undefined, formData: 
   const materialPreciosPersonalizados = formData.getAll("materialPrecioPersonalizado");
   const materialCantidadesPersonalizadas = formData.getAll("materialCantidadPersonalizada");
 
-  const lineasServicio: { servicioId: string; cantidad: number }[] = [];
+  const lineasServicio: { servicioId: string; cantidad: number; precio?: number }[] = [];
   for (let i = 0; i < servicioIds.length; i++) {
     const cantidad = Number(servicioCantidades[i]);
-    if (cantidad > 0) lineasServicio.push({ servicioId: String(servicioIds[i]), cantidad });
+    if (cantidad > 0) {
+      const precioOverride = Number(servicioPrecios[i]);
+      lineasServicio.push({
+        servicioId: String(servicioIds[i]),
+        cantidad,
+        precio: Number.isFinite(precioOverride) && precioOverride >= 0 ? precioOverride : undefined,
+      });
+    }
   }
 
   const lineasServicioPersonalizadas: { nombre: string; precio: number; cantidad: number }[] = [];
@@ -101,7 +109,11 @@ export async function crearCotizacion(_prevState: string | undefined, formData: 
         create: [
           ...lineasServicio.map((linea) => {
             const servicio = servicios.find((s) => s.id === linea.servicioId)!;
-            return { servicioId: linea.servicioId, cantidad: linea.cantidad, precioCobrado: servicio.precioBase };
+            return {
+              servicioId: linea.servicioId,
+              cantidad: linea.cantidad,
+              precioCobrado: linea.precio ?? servicio.precioBase,
+            };
           }),
           ...lineasServicioPersonalizadas.map((linea) => ({
             nombrePersonalizado: linea.nombre,
@@ -165,8 +177,10 @@ export async function agregarServicioACotizacion(cotizacionId: string, _prevStat
       return "Selecciona un servicio del catálogo";
     }
     const servicio = await prisma.servicio.findUniqueOrThrow({ where: { id: servicioId } });
+    const precioInput = Number(formData.get("precioCobrado"));
+    const precioCobrado = Number.isFinite(precioInput) && precioInput >= 0 ? precioInput : servicio.precioBase;
     await prisma.cotizacionServicio.create({
-      data: { cotizacionId, servicioId, cantidad, precioCobrado: servicio.precioBase },
+      data: { cotizacionId, servicioId, cantidad, precioCobrado },
     });
   } else {
     const nombre = formData.get("nombrePersonalizado");
@@ -231,6 +245,66 @@ export async function agregarMaterialACotizacion(cotizacionId: string, _prevStat
 
   revalidatePath(`/panel/cotizaciones/${cotizacionId}`);
   return undefined;
+}
+
+export async function actualizarDescuentoServicio(
+  cotizacionId: string,
+  lineaId: string,
+  _prevState: string | undefined,
+  formData: FormData
+) {
+  await requireSession();
+  await requireCotizacionEditable(cotizacionId);
+
+  const descuento = Number(formData.get("descuento")) || 0;
+  if (!Number.isFinite(descuento) || descuento < 0 || descuento > DESCUENTO_MAXIMO) {
+    return `El descuento debe ser un porcentaje entre 0 y ${DESCUENTO_MAXIMO}`;
+  }
+
+  await prisma.cotizacionServicio.update({
+    where: { id: lineaId, cotizacionId },
+    data: { descuento },
+  });
+
+  revalidatePath(`/panel/cotizaciones/${cotizacionId}`);
+  return undefined;
+}
+
+export async function actualizarDescuentoProducto(
+  cotizacionId: string,
+  lineaId: string,
+  _prevState: string | undefined,
+  formData: FormData
+) {
+  await requireSession();
+  await requireCotizacionEditable(cotizacionId);
+
+  const descuento = Number(formData.get("descuento")) || 0;
+  if (!Number.isFinite(descuento) || descuento < 0 || descuento > DESCUENTO_MAXIMO) {
+    return `El descuento debe ser un porcentaje entre 0 y ${DESCUENTO_MAXIMO}`;
+  }
+
+  await prisma.cotizacionProducto.update({
+    where: { id: lineaId, cotizacionId },
+    data: { descuento },
+  });
+
+  revalidatePath(`/panel/cotizaciones/${cotizacionId}`);
+  return undefined;
+}
+
+export async function eliminarServicioDeCotizacion(cotizacionId: string, lineaId: string) {
+  await requireSession();
+  await requireCotizacionEditable(cotizacionId);
+  await prisma.cotizacionServicio.delete({ where: { id: lineaId, cotizacionId } });
+  revalidatePath(`/panel/cotizaciones/${cotizacionId}`);
+}
+
+export async function eliminarProductoDeCotizacion(cotizacionId: string, lineaId: string) {
+  await requireSession();
+  await requireCotizacionEditable(cotizacionId);
+  await prisma.cotizacionProducto.delete({ where: { id: lineaId, cotizacionId } });
+  revalidatePath(`/panel/cotizaciones/${cotizacionId}`);
 }
 
 export async function aprobarCotizacion(id: string) {
@@ -306,11 +380,14 @@ export async function convertirCotizacionEnOrden(id: string, _prevState: string 
         cotizacionOrigenId: cotizacion.id,
         observaciones: cotizacion.observaciones,
         servicios: {
+          // El % de descuento de la cotización se aplica directamente al precio unitario
+          // para que el total de la orden coincida con lo cobrado, ya que la orden no tiene
+          // un campo de descuento propio.
           create: cotizacion.servicios.map((s) => ({
             servicioId: s.servicioId,
             nombrePersonalizado: s.nombrePersonalizado,
             cantidad: s.cantidad,
-            precioCobrado: s.precioCobrado,
+            precioCobrado: Number(s.precioCobrado) * (1 - Number(s.descuento) / 100),
           })),
         },
         productos: {
@@ -318,7 +395,7 @@ export async function convertirCotizacionEnOrden(id: string, _prevState: string 
             productoId: p.productoId,
             nombrePersonalizado: p.nombrePersonalizado,
             cantidad: p.cantidad,
-            precioUnitario: p.precioUnitario,
+            precioUnitario: Number(p.precioUnitario) * (1 - Number(p.descuento) / 100),
             costoUnitario: p.costoUnitario,
           })),
         },

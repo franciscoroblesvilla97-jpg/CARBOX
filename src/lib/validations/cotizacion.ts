@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+// Tope de descuento porcentual permitido por línea (servicio o producto) en una cotización.
+export const DESCUENTO_MAXIMO = 20;
+
 export const cotizacionCabeceraSchema = z.object({
   nombreCliente: z.string().min(2, "Nombre muy corto"),
   telefono: z

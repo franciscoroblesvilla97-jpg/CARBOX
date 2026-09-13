@@ -5,19 +5,33 @@ import { Badge } from "@/components/ui/badge";
 import { formatCLP } from "@/lib/format";
 import { requireSession } from "@/lib/permissions";
 import { CATEGORIAS_PRODUCTO, CATEGORIA_LABEL } from "@/lib/validations/inventario";
-import type { CategoriaProducto } from "@prisma/client";
+import { InventarioFiltros } from "./inventario-filtros";
+import type { CategoriaProducto, Prisma } from "@prisma/client";
 
 export default async function InventarioPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categoria?: string }>;
+  searchParams: Promise<{ categoria?: string; q?: string }>;
 }) {
   const user = await requireSession();
-  const { categoria } = await searchParams;
+  const { categoria, q } = await searchParams;
   const categoriaValida = CATEGORIAS_PRODUCTO.find((c) => c === categoria);
+  const busqueda = q?.trim();
+
+  const where: Prisma.ProductoWhereInput = {
+    ...(categoriaValida ? { categoria: categoriaValida } : {}),
+    ...(busqueda
+      ? {
+          OR: [
+            { nombre: { contains: busqueda, mode: "insensitive" } },
+            { sku: { contains: busqueda, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
 
   const productos = await prisma.producto.findMany({
-    where: categoriaValida ? { categoria: categoriaValida } : undefined,
+    where,
     orderBy: { nombre: "asc" },
   });
 
@@ -37,27 +51,7 @@ export default async function InventarioPage({
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        <Link
-          href="/panel/inventario"
-          className={`text-sm px-3 py-1 rounded-full border ${
-            !categoriaValida ? "bg-slate-900 text-white border-slate-900" : "border-slate-300 text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          Todas
-        </Link>
-        {CATEGORIAS_PRODUCTO.map((c) => (
-          <Link
-            key={c}
-            href={`/panel/inventario?categoria=${c}`}
-            className={`text-sm px-3 py-1 rounded-full border ${
-              categoriaValida === c ? "bg-slate-900 text-white border-slate-900" : "border-slate-300 text-slate-600 hover:bg-slate-50"
-            }`}
-          >
-            {CATEGORIA_LABEL[c]}
-          </Link>
-        ))}
-      </div>
+      <InventarioFiltros categoriaInicial={categoriaValida ?? ""} qInicial={busqueda ?? ""} />
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="w-full text-sm">

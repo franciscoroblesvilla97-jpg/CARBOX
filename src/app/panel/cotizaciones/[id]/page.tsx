@@ -8,6 +8,8 @@ import { EstadoActions } from "./estado-actions";
 import { ConvertirForm } from "./convertir-form";
 import { AgregarServicioForm } from "./agregar-servicio-form";
 import { AgregarMaterialForm } from "./agregar-material-form";
+import { ServiciosTabla } from "./servicios-tabla";
+import { ProductosTabla } from "./productos-tabla";
 
 const estadoColor = {
   PENDIENTE: "yellow",
@@ -40,8 +42,14 @@ export default async function CotizacionDetallePage({
   ]);
   const editable = cotizacion.estado === "PENDIENTE";
 
-  const totalServicios = cotizacion.servicios.reduce((acc, l) => acc + Number(l.precioCobrado) * l.cantidad, 0);
-  const totalProductos = cotizacion.productos.reduce((acc, l) => acc + Number(l.precioUnitario) * l.cantidad, 0);
+  const totalServicios = cotizacion.servicios.reduce(
+    (acc, l) => acc + Number(l.precioCobrado) * l.cantidad * (1 - Number(l.descuento) / 100),
+    0
+  );
+  const totalProductos = cotizacion.productos.reduce(
+    (acc, l) => acc + Number(l.precioUnitario) * l.cantidad * (1 - Number(l.descuento) / 100),
+    0
+  );
   const total = totalServicios + totalProductos;
 
   return (
@@ -70,25 +78,7 @@ export default async function CotizacionDetallePage({
 
       <div className="bg-white rounded-lg shadow p-4 mb-4">
         <h2 className="text-sm font-semibold text-slate-700 mb-3">Servicios</h2>
-        <table className="w-full text-sm">
-          <tbody className="divide-y divide-slate-100">
-            {cotizacion.servicios.map((linea) => (
-              <tr key={linea.id}>
-                <td className="py-2">
-                  {linea.servicio?.nombre ?? linea.nombrePersonalizado}
-                  {!linea.servicioId && <Badge color="blue">Personalizado</Badge>}
-                </td>
-                <td className="py-2 text-right text-slate-500">x{linea.cantidad}</td>
-                <td className="py-2 text-right font-medium">{formatCLP(Number(linea.precioCobrado) * linea.cantidad)}</td>
-              </tr>
-            ))}
-            {cotizacion.servicios.length === 0 && (
-              <tr>
-                <td className="py-2 text-slate-400">Sin servicios.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <ServiciosTabla lineas={cotizacion.servicios} cotizacionId={cotizacion.id} editable={editable} />
         {editable && (
           <div className="mt-4 pt-4 border-t border-slate-100">
             <AgregarServicioForm cotizacionId={cotizacion.id} servicios={servicios} />
@@ -98,25 +88,7 @@ export default async function CotizacionDetallePage({
 
       <div className="bg-white rounded-lg shadow p-4 mb-4">
         <h2 className="text-sm font-semibold text-slate-700 mb-3">Productos / materiales</h2>
-        <table className="w-full text-sm">
-          <tbody className="divide-y divide-slate-100">
-            {cotizacion.productos.map((linea) => (
-              <tr key={linea.id}>
-                <td className="py-2">
-                  {linea.producto?.nombre ?? linea.nombrePersonalizado}
-                  {!linea.productoId && <Badge color="blue">Externo</Badge>}
-                </td>
-                <td className="py-2 text-right text-slate-500">x{linea.cantidad}</td>
-                <td className="py-2 text-right font-medium">{formatCLP(Number(linea.precioUnitario) * linea.cantidad)}</td>
-              </tr>
-            ))}
-            {cotizacion.productos.length === 0 && (
-              <tr>
-                <td className="py-2 text-slate-400">Sin productos.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <ProductosTabla lineas={cotizacion.productos} cotizacionId={cotizacion.id} editable={editable} />
         {editable && (
           <div className="mt-4 pt-4 border-t border-slate-100">
             <AgregarMaterialForm cotizacionId={cotizacion.id} productos={productos} />

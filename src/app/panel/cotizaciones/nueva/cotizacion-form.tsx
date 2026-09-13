@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { crearCotizacion } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/input";
@@ -8,10 +8,20 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { formatCLP } from "@/lib/format";
 import type { Servicio, Producto } from "@prisma/client";
 
-const FILAS_PERSONALIZADAS = 3;
+const FILAS_INICIALES = 3;
 
 export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]; productos: Producto[] }) {
   const [error, formAction, pending] = useActionState(crearCotizacion, undefined);
+
+  const [filasServicio, setFilasServicio] = useState<number[]>(() =>
+    Array.from({ length: FILAS_INICIALES }, (_, i) => i)
+  );
+  const siguienteIdServicio = useRef(FILAS_INICIALES);
+
+  const [filasMaterial, setFilasMaterial] = useState<number[]>(() =>
+    Array.from({ length: FILAS_INICIALES }, (_, i) => i)
+  );
+  const siguienteIdMaterial = useRef(FILAS_INICIALES);
 
   return (
     <form action={formAction} className="space-y-6 max-w-3xl">
@@ -44,21 +54,34 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
 
       <div>
         <h2 className="text-sm font-semibold text-slate-700 mb-2">Servicios del catálogo</h2>
+        <p className="text-xs text-slate-400 mb-2">El precio viene precargado desde el catálogo, pero puedes ajustarlo para esta cotización.</p>
         <div className="bg-white rounded-md border border-slate-200 divide-y divide-slate-100">
           {servicios.map((servicio) => (
-            <div key={servicio.id} className="flex items-center justify-between px-3 py-2">
-              <div>
+            <div key={servicio.id} className="flex items-center justify-between gap-3 px-3 py-2">
+              <div className="flex-1 min-w-0">
                 <input type="hidden" name="servicioId" value={servicio.id} />
-                <p className="text-sm font-medium text-slate-800">{servicio.nombre}</p>
-                <p className="text-xs text-slate-500">{formatCLP(servicio.precioBase.toString())}</p>
+                <p className="text-sm font-medium text-slate-800 truncate">{servicio.nombre}</p>
               </div>
-              <input
-                type="number"
-                name="servicioCantidad"
-                min={0}
-                defaultValue={0}
-                className="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm"
-              />
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs text-slate-400">$</span>
+                <input
+                  type="number"
+                  name="servicioPrecio"
+                  min={0}
+                  step="1"
+                  defaultValue={Number(servicio.precioBase)}
+                  title="Precio a cobrar (editable)"
+                  className="w-28 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                />
+                <input
+                  type="number"
+                  name="servicioCantidad"
+                  min={0}
+                  defaultValue={0}
+                  title="Cantidad"
+                  className="w-16 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -67,8 +90,8 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
       <div>
         <h2 className="text-sm font-semibold text-slate-700 mb-2">Servicios personalizados (opcional)</h2>
         <div className="space-y-2">
-          {Array.from({ length: FILAS_PERSONALIZADAS }).map((_, i) => (
-            <div key={i} className="grid grid-cols-6 gap-2 items-center">
+          {filasServicio.map((id) => (
+            <div key={id} className="grid grid-cols-7 gap-2 items-center">
               <input
                 name="servicioNombrePersonalizado"
                 placeholder="Nombre del servicio"
@@ -88,9 +111,26 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
                 defaultValue={1}
                 className="rounded-md border border-slate-300 px-2 py-1 text-sm"
               />
+              <button
+                type="button"
+                onClick={() => setFilasServicio((filas) => filas.filter((f) => f !== id))}
+                className="text-slate-400 hover:text-red-600 text-sm justify-self-end"
+                aria-label="Quitar fila"
+              >
+                ✕
+              </button>
             </div>
           ))}
         </div>
+        <button
+          type="button"
+          onClick={() =>
+            setFilasServicio((filas) => [...filas, siguienteIdServicio.current++])
+          }
+          className="mt-2 text-sm font-medium text-green-700 hover:text-green-800"
+        >
+          + Agregar otro servicio
+        </button>
       </div>
 
       <div>
@@ -118,8 +158,8 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
       <div>
         <h2 className="text-sm font-semibold text-slate-700 mb-2">Materiales externos (opcional)</h2>
         <div className="space-y-2">
-          {Array.from({ length: FILAS_PERSONALIZADAS }).map((_, i) => (
-            <div key={i} className="grid grid-cols-7 gap-2 items-center">
+          {filasMaterial.map((id) => (
+            <div key={id} className="grid grid-cols-8 gap-2 items-center">
               <input
                 name="materialNombrePersonalizado"
                 placeholder="Nombre del material"
@@ -146,9 +186,26 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
                 defaultValue={1}
                 className="rounded-md border border-slate-300 px-2 py-1 text-sm"
               />
+              <button
+                type="button"
+                onClick={() => setFilasMaterial((filas) => filas.filter((f) => f !== id))}
+                className="text-slate-400 hover:text-red-600 text-sm justify-self-end"
+                aria-label="Quitar fila"
+              >
+                ✕
+              </button>
             </div>
           ))}
         </div>
+        <button
+          type="button"
+          onClick={() =>
+            setFilasMaterial((filas) => [...filas, siguienteIdMaterial.current++])
+          }
+          className="mt-2 text-sm font-medium text-green-700 hover:text-green-800"
+        >
+          + Agregar otro material
+        </button>
       </div>
 
       <Field label="Observaciones (opcional)">

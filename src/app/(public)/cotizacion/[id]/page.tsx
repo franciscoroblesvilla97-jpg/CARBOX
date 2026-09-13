@@ -19,8 +19,14 @@ export default async function CotizacionPublicaPage({
 
   if (!cotizacion) notFound();
 
-  const totalServicios = cotizacion.servicios.reduce((acc, l) => acc + Number(l.precioCobrado) * l.cantidad, 0);
-  const totalProductos = cotizacion.productos.reduce((acc, l) => acc + Number(l.precioUnitario) * l.cantidad, 0);
+  const totalServicios = cotizacion.servicios.reduce(
+    (acc, l) => acc + Number(l.precioCobrado) * l.cantidad * (1 - Number(l.descuento) / 100),
+    0
+  );
+  const totalProductos = cotizacion.productos.reduce(
+    (acc, l) => acc + Number(l.precioUnitario) * l.cantidad * (1 - Number(l.descuento) / 100),
+    0
+  );
   const total = totalServicios + totalProductos;
 
   return (
@@ -62,7 +68,12 @@ export default async function CotizacionPublicaPage({
               <tr key={linea.id}>
                 <td className="py-2">{linea.servicio?.nombre ?? linea.nombrePersonalizado}</td>
                 <td className="py-2 text-right">{linea.cantidad}</td>
-                <td className="py-2 text-right">{formatCLP(Number(linea.precioCobrado) * linea.cantidad)}</td>
+                <td className="py-2 text-right">
+                  {formatCLP(Number(linea.precioCobrado) * linea.cantidad * (1 - Number(linea.descuento) / 100))}
+                  {Number(linea.descuento) > 0 && (
+                    <span className="block text-xs text-slate-400">Desc. −{Number(linea.descuento)}%</span>
+                  )}
+                </td>
               </tr>
             ))}
             {cotizacion.servicios.length === 0 && (
@@ -88,7 +99,12 @@ export default async function CotizacionPublicaPage({
               <tr key={linea.id}>
                 <td className="py-2">{linea.producto?.nombre ?? linea.nombrePersonalizado}</td>
                 <td className="py-2 text-right">{linea.cantidad}</td>
-                <td className="py-2 text-right">{formatCLP(Number(linea.precioUnitario) * linea.cantidad)}</td>
+                <td className="py-2 text-right">
+                  {formatCLP(Number(linea.precioUnitario) * linea.cantidad * (1 - Number(linea.descuento) / 100))}
+                  {Number(linea.descuento) > 0 && (
+                    <span className="block text-xs text-slate-400">Desc. −{Number(linea.descuento)}%</span>
+                  )}
+                </td>
               </tr>
             ))}
             {cotizacion.productos.length === 0 && (
