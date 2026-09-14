@@ -1,11 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import { proximaHoraDisponible } from "@/lib/format";
-import { esHoyChile, inicioDiaChile, minutosDesdeMedianocheChile } from "@/lib/timezone";
+import { diaSemanaChile, esHoyChile, inicioDiaChile, minutosDesdeMedianocheChile } from "@/lib/timezone";
 
 const HORA_INICIO = 9;
-const HORA_FIN = 19;
+const HORA_FIN_SEMANA = 18;
+const HORA_FIN_SABADO = 14;
 const PASO_MIN = 30;
 const DURACION_MIN_DEFAULT = 30;
+
+// Hora de cierre (en hora de Chile) para el día de `fecha`: lunes a viernes 18:00,
+// sábado 14:00, domingo cerrado (null).
+function horaCierre(fecha: Date): number | null {
+  const diaSemana = diaSemanaChile(fecha);
+  if (diaSemana === 0) return null;
+  return diaSemana === 6 ? HORA_FIN_SABADO : HORA_FIN_SEMANA;
+}
 
 export async function duracionServicio(servicioTexto: string) {
   const servicio = await prisma.servicio.findFirst({ where: { nombre: servicioTexto } });
@@ -66,6 +75,9 @@ function hayPuestoLibre(
 
 // Lista los horarios (Date) disponibles para un día, dada la duración del servicio elegido.
 export async function horariosDisponibles(dia: Date, duracionMin: number, excluirOrdenId?: string) {
+  const cierre = horaCierre(dia);
+  if (cierre === null) return []; // domingo: taller cerrado
+
   const { puestos, bloques } = await ocupacionDelDia(dia, excluirOrdenId);
   if (puestos.length === 0) return [];
 
@@ -73,7 +85,7 @@ export async function horariosDisponibles(dia: Date, duracionMin: number, exclui
   const minimoHoyMin = esHoyChile(dia) ? minutosDesdeMedianocheChile(proximaHoraDisponible()) : -Infinity;
 
   const disponibles: Date[] = [];
-  for (let min = HORA_INICIO * 60; min + duracionMin <= HORA_FIN * 60; min += PASO_MIN) {
+  for (let min = HORA_INICIO * 60; min + duracionMin <= cierre * 60; min += PASO_MIN) {
     if (min < minimoHoyMin) continue;
     if (hayPuestoLibre(puestos, bloques, min, duracionMin)) {
       disponibles.push(new Date(inicio.getTime() + min * 60000));
@@ -85,8 +97,13 @@ export async function horariosDisponibles(dia: Date, duracionMin: number, exclui
 // Busca un puesto libre para una fecha/hora exacta (usado al confirmar la reserva,
 // para revalidar y asignar puesto de forma atómica respecto a lo que se le mostró al visitante).
 export async function puestoDisponiblePara(fecha: Date, duracionMin: number, excluirOrdenId?: string) {
-  const { puestos, bloques } = await ocupacionDelDia(fecha, excluirOrdenId);
+  const cierre = horaCierre(fecha);
   const inicioMin = minutosDesdeMedianocheChile(fecha);
+  if (cierre === null || inicioMin < HORA_INICIO * 60 || inicioMin + duracionMin > cierre * 60) {
+    return null; // fuera del horario de atención (taller cerrado a esa hora)
+  }
+
+  const { puestos, bloques } = await ocupacionDelDia(fecha, excluirOrdenId);
 
   for (const p of puestos) {
     const ocupado = bloques.some(

@@ -20,7 +20,7 @@ export default function NosotrosPage() {
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="font-bold text-slate-900 mb-1">Horario</h2>
-            <p className="text-slate-500">Lunes a sábado, 9:00 a 19:00</p>
+            <p className="text-slate-500">Lunes a viernes 9:00 a 18:00 · Sábado 9:00 a 14:00</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="font-bold text-slate-900 mb-1">Teléfono / WhatsApp</h2>

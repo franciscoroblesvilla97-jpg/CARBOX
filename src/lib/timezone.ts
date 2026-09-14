@@ -35,3 +35,12 @@ export function esHoyChile(instante: Date): boolean {
   const formato = new Intl.DateTimeFormat("en-CA", { timeZone: ZONA });
   return formato.format(instante) === formato.format(new Date());
 }
+
+// Día de la semana (0=domingo … 6=sábado) del día calendario de Chile de `instante`.
+export function diaSemanaChile(instante: Date): number {
+  const [anio, mes, dia] = new Intl.DateTimeFormat("en-CA", { timeZone: ZONA })
+    .format(instante)
+    .split("-")
+    .map(Number);
+  return new Date(Date.UTC(anio, mes - 1, dia)).getUTCDay();
+}

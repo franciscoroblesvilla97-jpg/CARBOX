@@ -12,7 +12,7 @@ export function Contacto() {
           <h2 className="font-[family-name:var(--font-barlow-condensed)] font-semibold uppercase text-[clamp(26px,3vw,38px)]">
             Pedro de Valdivia 525, Concepción
           </h2>
-          <p className="mt-3 text-neutral-300">Lunes a viernes 09:00 – 19:00 · Sábado 09:00 – 14:00</p>
+          <p className="mt-3 text-neutral-300">Lunes a viernes 09:00 – 18:00 · Sábado 09:00 – 14:00</p>
           <p className="text-neutral-300">{TELEFONO_CARBOX}</p>
           <div className="mt-[20.4px] flex flex-wrap gap-[13.6px]">
             <a

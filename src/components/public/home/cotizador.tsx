@@ -55,19 +55,23 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
   );
 
   useEffect(() => {
-    if (!dia || seleccionados.size === 0) {
-      setHorarios([]);
-      setHora(null);
-      return;
-    }
-    setCargandoHorarios(true);
-    fetch(`/api/disponibilidad?fecha=${dia}&duracion=${duracionTotal}`)
-      .then((r) => r.json())
-      .then((data) => {
+    async function cargarHorarios() {
+      if (!dia || seleccionados.size === 0) {
+        setHorarios([]);
+        setHora(null);
+        return;
+      }
+      setCargandoHorarios(true);
+      try {
+        const res = await fetch(`/api/disponibilidad?fecha=${dia}&duracion=${duracionTotal}`);
+        const data = await res.json();
         setHorarios(data.horarios ?? []);
         setHora((actual) => (actual && data.horarios?.includes(actual) ? actual : null));
-      })
-      .finally(() => setCargandoHorarios(false));
+      } finally {
+        setCargandoHorarios(false);
+      }
+    }
+    cargarHorarios();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dia, duracionTotal]);
 
@@ -256,7 +260,8 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
                   Elige tu hora
                 </h2>
                 <p className="text-[15px] text-neutral-600 mb-4">
-                  Bloques de 30 min entre 09:00 y 19:00, según puestos libres. Tu servicio ocupa {duracionTotal} min.
+                  Bloques de 30 min, lunes a viernes 09:00–18:00 y sábado 09:00–14:00, según puestos libres. Tu
+                  servicio ocupa {duracionTotal} min.
                 </p>
                 <div className="flex flex-wrap gap-[10.2px] mb-[20.4px] overflow-x-auto">
                   {diasHabiles.map((d) => {

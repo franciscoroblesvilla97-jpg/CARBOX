@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { empaquetarBloques } from "@/lib/agendaCalendario";
+import { minutosDesdeMedianocheChile } from "@/lib/timezone";
 import type { EstadoOrden, OrdenTrabajoServicio, Servicio, Vehiculo, Cliente, Trabajador, Puesto } from "@prisma/client";
 
 const HORA_INICIO = 9;
-const HORA_FIN = 19;
+const HORA_FIN = 18;
 const PX_POR_MIN = 1; // 60px por hora
 const ALTO_TOTAL = (HORA_FIN - HORA_INICIO) * 60 * PX_POR_MIN;
 const ALTO_MIN_BLOQUE = 24;
@@ -59,8 +60,7 @@ export function AgendaCalendario({ ordenes, puestos }: { ordenes: OrdenConDatos[
           const ordenesColumna = ordenes.filter((o) => o.puestoId === col.id);
           const bloques = empaquetarBloques(
             ordenesColumna.map((o) => {
-              const fecha = o.fechaProgramada;
-              const inicioMin = fecha.getHours() * 60 + fecha.getMinutes();
+              const inicioMin = minutosDesdeMedianocheChile(o.fechaProgramada);
               return { inicioMin, duracionMin: Math.max(duracionOrden(o.servicios), 20), orden: o };
             })
           );
