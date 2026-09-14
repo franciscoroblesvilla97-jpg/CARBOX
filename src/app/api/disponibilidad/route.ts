@@ -11,10 +11,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Faltan parámetros" }, { status: 400 });
   }
 
-  const dia = new Date(`${fechaStr}T00:00:00`);
-  if (Number.isNaN(dia.getTime())) {
+  const [anio, mes, diaNum] = fechaStr.split("-").map(Number);
+  if (!anio || !mes || !diaNum) {
     return NextResponse.json({ error: "Fecha inválida" }, { status: 400 });
   }
+  // Ancla al mediodía UTC: cae siempre dentro del mismo día calendario en Chile,
+  // sin depender de la zona horaria en la que corre el proceso del servidor.
+  const dia = new Date(Date.UTC(anio, mes - 1, diaNum, 12));
 
   const duracion = duracionParam ? Number(duracionParam) : await duracionServicio(servicioTexto!);
   const horarios = await horariosDisponibles(dia, duracion, excluirOrdenId);
