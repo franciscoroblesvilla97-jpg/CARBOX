@@ -79,7 +79,8 @@ export async function convertirEnOrden(id: string) {
     where: { nombre: { equals: solicitud.servicioTexto } },
   });
 
-  const numero = (await prisma.ordenTrabajo.count()) + 1;
+  const { _max: maxOrden } = await prisma.ordenTrabajo.aggregate({ _max: { numero: true } });
+  const numero = (maxOrden.numero ?? 0) + 1;
 
   const orden = await prisma.ordenTrabajo.create({
     data: {

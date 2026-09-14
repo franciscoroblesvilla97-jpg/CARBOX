@@ -22,6 +22,7 @@ export function ProductoForm({ producto }: { producto?: Producto }) {
   const [costoUnitario, setCostoUnitario] = useState(costoInicial);
   const [margen, setMargen] = useState(producto ? margenDesdePrecios(costoInicial, precioInicial) : "30");
   const [precioVenta, setPrecioVenta] = useState(precioInicial);
+  const [categoria, setCategoria] = useState(producto?.categoria ?? "OTRO");
 
   function recalcularPrecio(costo: number, margenPct: string) {
     const m = parseFloat(margenPct);
@@ -38,7 +39,7 @@ export function ProductoForm({ producto }: { producto?: Producto }) {
         <Input name="sku" defaultValue={producto?.sku ?? ""} />
       </Field>
       <Field label="Categoría">
-        <Select name="categoria" defaultValue={producto?.categoria ?? "OTRO"}>
+        <Select name="categoria" value={categoria} onChange={(e) => setCategoria(e.target.value as typeof categoria)}>
           {CATEGORIAS_PRODUCTO.map((c) => (
             <option key={c} value={c}>
               {CATEGORIA_LABEL[c]}
@@ -46,6 +47,25 @@ export function ProductoForm({ producto }: { producto?: Producto }) {
           ))}
         </Select>
       </Field>
+      {categoria === "NEUMATICOS" && (
+        <>
+          <Field label="Marca (opcional)">
+            <Input name="marca" defaultValue={producto?.marca ?? ""} placeholder="Ej: Kumho" />
+          </Field>
+          <Field label="Medida (opcional)">
+            <Input name="medida" defaultValue={producto?.medida ?? ""} placeholder="Ej: 195/65 R15" />
+            <p className="text-xs text-slate-400 mt-1">
+              Formato exacto ancho/perfil R aro — así lo encuentra el buscador del sitio.
+            </p>
+          </Field>
+          <Field label="Índice de carga/velocidad (opcional)">
+            <Input name="indice" defaultValue={producto?.indice ?? ""} placeholder="Ej: 91H" />
+          </Field>
+          <Field label="URL de foto (opcional)">
+            <Input name="imagenUrl" defaultValue={producto?.imagenUrl ?? ""} placeholder="https://..." />
+          </Field>
+        </>
+      )}
       <Field label="Unidad">
         <Input name="unidad" defaultValue={producto?.unidad ?? "unidad"} required />
       </Field>

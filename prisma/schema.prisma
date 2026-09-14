@@ -1,6 +1,7 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -95,10 +96,16 @@ model Producto {
   costoUnitario    Decimal                @default(0)
   stockActual      Int                    @default(0)
   stockMinimo      Int                    @default(0) // umbral de alerta bajo stock
+  marca            String? // ej: "Kumho" — usado por el buscador de neumáticos
+  medida           String? // ej: "195/65 R15" — usado por el buscador de neumáticos
+  indice           String? // índice de carga/velocidad, ej: "91H"
+  imagenUrl        String?
   createdAt        DateTime               @default(now())
   lineasOrden      OrdenTrabajoProducto[]
   lineasCotizacion CotizacionProducto[]
   movimientos      MovimientoInventario[]
+
+  @@index([categoria, medida])
 }
 
 model Servicio {

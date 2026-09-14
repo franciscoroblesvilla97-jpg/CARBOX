@@ -371,7 +371,8 @@ export async function convertirCotizacionEnOrden(id: string, _prevState: string 
   const vehiculoIdFinal = vehiculoId;
 
   const orden = await prisma.$transaction(async (tx) => {
-    const numero = (await tx.ordenTrabajo.count()) + 1;
+    const { _max: maxOrden } = await tx.ordenTrabajo.aggregate({ _max: { numero: true } });
+    const numero = (maxOrden.numero ?? 0) + 1;
 
     const nuevaOrden = await tx.ordenTrabajo.create({
       data: {

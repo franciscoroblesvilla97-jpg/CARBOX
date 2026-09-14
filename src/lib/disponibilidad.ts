@@ -11,6 +11,14 @@ export async function duracionServicio(servicioTexto: string) {
   return Math.max(servicio?.duracionMinutos || 0, DURACION_MIN_DEFAULT);
 }
 
+// Suma la duración de varios servicios marcados a la vez (cotizador de la home), con mínimo 30 min.
+export async function duracionServicios(servicioIds: string[]) {
+  if (servicioIds.length === 0) return DURACION_MIN_DEFAULT;
+  const servicios = await prisma.servicio.findMany({ where: { id: { in: servicioIds } } });
+  const total = servicios.reduce((acc, s) => acc + (s.duracionMinutos || 0), 0);
+  return Math.max(total, DURACION_MIN_DEFAULT);
+}
+
 function inicioDia(fecha: Date) {
   const d = new Date(fecha);
   d.setHours(0, 0, 0, 0);

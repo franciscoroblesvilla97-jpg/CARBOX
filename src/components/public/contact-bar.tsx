@@ -1,17 +1,16 @@
-const TELEFONO = "+56982106659";
-const MENSAJE_WHATSAPP = encodeURIComponent("Hola Carbox, quisiera consultar por un servicio.");
+import { TELEFONO_CARBOX, whatsappUrl } from "@/lib/whatsapp";
 
 export function ContactBar() {
   return (
     <div className="fixed bottom-0 inset-x-0 z-20 grid grid-cols-2">
       <a
-        href={`tel:${TELEFONO}`}
+        href={`tel:${TELEFONO_CARBOX}`}
         className="flex items-center justify-center gap-2 bg-red-600 text-white font-semibold py-3 text-sm"
       >
         <PhoneIcon /> Llamar
       </a>
       <a
-        href={`https://wa.me/${TELEFONO.replace("+", "")}?text=${MENSAJE_WHATSAPP}`}
+        href={whatsappUrl("Hola Carbox, quisiera consultar por un servicio.")}
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center justify-center gap-2 bg-green-500 text-white font-semibold py-3 text-sm"

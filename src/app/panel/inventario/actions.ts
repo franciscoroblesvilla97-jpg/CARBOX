@@ -18,6 +18,10 @@ export async function crearProducto(_prevState: string | undefined, formData: Fo
     costoUnitario: formData.get("costoUnitario"),
     stockActual: formData.get("stockActual"),
     stockMinimo: formData.get("stockMinimo"),
+    marca: formData.get("marca"),
+    medida: formData.get("medida"),
+    indice: formData.get("indice"),
+    imagenUrl: formData.get("imagenUrl"),
   });
 
   if (!parsed.success) {
@@ -34,6 +38,10 @@ export async function crearProducto(_prevState: string | undefined, formData: Fo
       costoUnitario: parsed.data.costoUnitario,
       stockActual: parsed.data.stockActual,
       stockMinimo: parsed.data.stockMinimo,
+      marca: parsed.data.marca || null,
+      medida: parsed.data.medida || null,
+      indice: parsed.data.indice || null,
+      imagenUrl: parsed.data.imagenUrl || null,
     },
   });
 
@@ -53,6 +61,10 @@ export async function actualizarProducto(id: string, _prevState: string | undefi
     costoUnitario: formData.get("costoUnitario"),
     stockActual: formData.get("stockActual"),
     stockMinimo: formData.get("stockMinimo"),
+    marca: formData.get("marca"),
+    medida: formData.get("medida"),
+    indice: formData.get("indice"),
+    imagenUrl: formData.get("imagenUrl"),
   });
 
   if (!parsed.success) {
@@ -70,6 +82,10 @@ export async function actualizarProducto(id: string, _prevState: string | undefi
       costoUnitario: parsed.data.costoUnitario,
       stockActual: parsed.data.stockActual,
       stockMinimo: parsed.data.stockMinimo,
+      marca: parsed.data.marca || null,
+      medida: parsed.data.medida || null,
+      indice: parsed.data.indice || null,
+      imagenUrl: parsed.data.imagenUrl || null,
     },
   });
 
