@@ -32,6 +32,7 @@ export async function crearServicio(_prevState: string | undefined, formData: Fo
   });
 
   revalidatePath("/panel/servicios");
+  revalidatePath("/");
   redirect("/panel/servicios");
 }
 
@@ -62,5 +63,6 @@ export async function actualizarServicio(id: string, _prevState: string | undefi
   });
 
   revalidatePath("/panel/servicios");
+  revalidatePath("/");
   redirect("/panel/servicios");
 }
