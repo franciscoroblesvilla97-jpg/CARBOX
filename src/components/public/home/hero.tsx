@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { CornerFrame } from "./corner-frame";
 
 export function Hero() {
@@ -31,8 +32,14 @@ export function Hero() {
             </a>
           </div>
         </div>
-        <CornerFrame dark className="aspect-4/3 flex items-end p-4 bg-[repeating-linear-gradient(135deg,rgba(242,242,243,0.08),rgba(242,242,243,0.08)_10px,transparent_10px,transparent_20px)]">
-          <span className="text-[12px] text-neutral-300">Foto del taller (duotono azul)</span>
+        <CornerFrame dark className="aspect-4/3 relative overflow-hidden">
+          <Image
+            src="/taller-hero.jpg"
+            alt="Fachada del taller Carbox en Pedro de Valdivia 525, Concepción"
+            fill
+            className="object-cover"
+            priority
+          />
         </CornerFrame>
       </div>
     </section>
