@@ -15,6 +15,7 @@ type Resultado = {
   indice: string | null;
   precioVenta: number;
   stockActual: number;
+  imagenUrl: string | null;
 };
 
 export function Neumaticos() {
@@ -97,7 +98,16 @@ export function Neumaticos() {
             <div className="border border-ink/16 bg-paper divide-y divide-ink/10">
               {resultados.slice(0, 5).map((r) => (
                 <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-[13.6px]">
-                  <div>
+                  <div className="flex items-center gap-3">
+                    {r.imagenUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={r.imagenUrl}
+                        alt={r.nombre}
+                        className="w-14 h-14 object-cover border border-ink/16 shrink-0"
+                      />
+                    )}
+                    <div>
                     {r.marca && (
                       <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-neutral-500">
                         {r.marca}
@@ -110,6 +120,7 @@ export function Neumaticos() {
                       {medidaBuscada}
                       {r.indice ? ` ${r.indice}` : ""} · {r.stockActual} en stock
                     </p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <p className="font-[family-name:var(--font-barlow-condensed)] font-semibold text-[22px]">
