@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatFecha } from "@/lib/format";
 import { ReservaAcciones } from "./reserva-acciones";
+import { InformeHeader } from "@/components/public/informe-header";
 
 export default async function ReservaPublicaPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -24,7 +25,9 @@ export default async function ReservaPublicaPage({ params }: { params: Promise<{
   const finalizada = orden.estado === "CANCELADA" || orden.estado === "COMPLETADA";
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16">
+    <div className="min-h-screen bg-slate-50">
+      <InformeHeader />
+      <div className="max-w-md mx-auto px-4 py-16">
       <h1 className="text-2xl font-bold text-slate-900 mb-1">Tu hora en Carbox</h1>
       <p className="text-slate-500 mb-6">
         Hola {orden.vehiculo.cliente.nombre}, esta es tu reserva.
@@ -55,6 +58,7 @@ export default async function ReservaPublicaPage({ params }: { params: Promise<{
           confirmadoCliente={orden.confirmadoCliente}
         />
       )}
+      </div>
     </div>
   );
 }

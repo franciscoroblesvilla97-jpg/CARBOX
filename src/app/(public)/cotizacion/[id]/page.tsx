@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatCLP, formatFechaCorta } from "@/lib/format";
+import { InformeHeader } from "@/components/public/informe-header";
 
 export default async function CotizacionPublicaPage({
   params,
@@ -30,8 +31,10 @@ export default async function CotizacionPublicaPage({
   const total = totalServicios + totalProductos;
 
   return (
-    <div className="max-w-2xl mx-auto py-12 px-4">
-      <div className="border border-slate-200 rounded-lg p-8">
+    <div className="min-h-screen bg-slate-50">
+      <InformeHeader />
+      <div className="max-w-2xl mx-auto py-12 px-4">
+      <div className="border border-slate-200 rounded-lg p-8 bg-white">
         <div className="flex items-start justify-between border-b border-slate-200 pb-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Carbox</h1>
@@ -131,6 +134,7 @@ export default async function CotizacionPublicaPage({
         <p className="text-xs text-slate-400 text-center mt-10">
           Cotización sujeta a disponibilidad de repuestos y cambios de precio. Válida por 15 días.
         </p>
+      </div>
       </div>
     </div>
   );

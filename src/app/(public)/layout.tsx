@@ -7,9 +7,15 @@ import { ContactBar } from "@/components/public/contact-bar";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const esHomeRediseñada = pathname === "/";
+  // Home + páginas-informe enlazadas por correo/WhatsApp a un cliente puntual: usan
+  // su propio encabezado de marca (Industry), no el nav general del sitio.
+  const sinChromeAntiguo =
+    pathname === "/" ||
+    pathname.startsWith("/informe-orden") ||
+    pathname.startsWith("/cotizacion") ||
+    pathname.startsWith("/reserva");
 
-  if (esHomeRediseñada) {
+  if (sinChromeAntiguo) {
     return <div className="flex flex-col min-h-screen">{children}</div>;
   }
 
