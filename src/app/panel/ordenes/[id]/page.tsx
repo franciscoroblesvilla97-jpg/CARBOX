@@ -8,6 +8,8 @@ import { EstadoActions } from "./estado-actions";
 import { AsignacionForm } from "./asignacion-form";
 import { AgregarServicioForm } from "./agregar-servicio-form";
 import { AgregarMaterialForm } from "./agregar-material-form";
+import { ChecklistForm } from "./checklist-form";
+import { ArchivosOrden } from "./archivos-orden";
 
 const estadoColor = {
   PENDIENTE: "yellow",
@@ -29,12 +31,19 @@ export default async function OrdenDetallePage({
     include: {
       vehiculo: { include: { cliente: true } },
       creadoPor: true,
+      trabajador: true,
+      puesto: true,
       servicios: { include: { servicio: true } },
       productos: { include: { producto: true } },
+      checklist: { include: { items: { orderBy: { orden: "asc" } }, presiones: { orderBy: { orden: "asc" } }, danos: true } },
+      archivos: { include: { subidoPor: true }, orderBy: { createdAt: "desc" } },
     },
   });
 
   if (!orden) notFound();
+
+  const esTecnico = user.rol === "TECNICO";
+  if (esTecnico && orden.trabajadorId !== user.trabajadorId) notFound();
 
   const [trabajadores, puestos, servicios, productos] = await Promise.all([
     prisma.trabajador.findMany({ where: { activo: true }, orderBy: { nombre: "asc" } }),
@@ -89,13 +98,19 @@ export default async function OrdenDetallePage({
 
       <div className="bg-white rounded-lg shadow p-4 mb-4">
         <h2 className="text-sm font-semibold text-slate-700 mb-3">Asignación</h2>
-        <AsignacionForm
-          ordenId={orden.id}
-          trabajadorId={orden.trabajadorId}
-          puestoId={orden.puestoId}
-          trabajadores={trabajadores}
-          puestos={puestosConCapacidad}
-        />
+        {esTecnico ? (
+          <p className="text-sm text-slate-600">
+            Asignada a ti {orden.puesto && <>· Puesto: {orden.puesto.nombre}</>}
+          </p>
+        ) : (
+          <AsignacionForm
+            ordenId={orden.id}
+            trabajadorId={orden.trabajadorId}
+            puestoId={orden.puestoId}
+            trabajadores={trabajadores}
+            puestos={puestosConCapacidad}
+          />
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow p-4 mb-4">
@@ -109,7 +124,11 @@ export default async function OrdenDetallePage({
                   {!linea.servicioId && <Badge color="blue">Personalizado</Badge>}
                 </td>
                 <td className="py-2 text-right text-slate-500">x{linea.cantidad}</td>
-                <td className="py-2 text-right font-medium">{formatCLP(Number(linea.precioCobrado) * linea.cantidad)}</td>
+                {!esTecnico && (
+                  <td className="py-2 text-right font-medium">
+                    {formatCLP(Number(linea.precioCobrado) * linea.cantidad)}
+                  </td>
+                )}
               </tr>
             ))}
             {orden.servicios.length === 0 && (
@@ -119,7 +138,7 @@ export default async function OrdenDetallePage({
             )}
           </tbody>
         </table>
-        {ordenEditable && <AgregarServicioForm ordenId={orden.id} servicios={servicios} />}
+        {ordenEditable && !esTecnico && <AgregarServicioForm ordenId={orden.id} servicios={servicios} />}
       </div>
 
       <div className="bg-white rounded-lg shadow p-4 mb-4">
@@ -130,7 +149,7 @@ export default async function OrdenDetallePage({
               <th className="font-normal pb-1">Producto</th>
               <th className="font-normal pb-1 text-right">Cant.</th>
               {user.rol === "ADMIN" && <th className="font-normal pb-1 text-right">Costo</th>}
-              <th className="font-normal pb-1 text-right">Cobrado</th>
+              {!esTecnico && <th className="font-normal pb-1 text-right">Cobrado</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -146,19 +165,23 @@ export default async function OrdenDetallePage({
                     {formatCLP(Number(linea.costoUnitario) * linea.cantidad)}
                   </td>
                 )}
-                <td className="py-2 text-right font-medium">{formatCLP(Number(linea.precioUnitario) * linea.cantidad)}</td>
+                {!esTecnico && (
+                  <td className="py-2 text-right font-medium">
+                    {formatCLP(Number(linea.precioUnitario) * linea.cantidad)}
+                  </td>
+                )}
               </tr>
             ))}
             {orden.productos.length === 0 && (
               <tr>
-                <td colSpan={user.rol === "ADMIN" ? 4 : 3} className="py-2 text-slate-400">
+                <td colSpan={user.rol === "ADMIN" ? 4 : esTecnico ? 2 : 3} className="py-2 text-slate-400">
                   Sin productos en esta orden.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-        {ordenEditable && <AgregarMaterialForm ordenId={orden.id} productos={productos} />}
+        {ordenEditable && !esTecnico && <AgregarMaterialForm ordenId={orden.id} productos={productos} />}
       </div>
 
       {orden.observaciones && (
@@ -168,16 +191,51 @@ export default async function OrdenDetallePage({
         </div>
       )}
 
-      <div className="flex flex-col items-end gap-1">
-        {user.rol === "ADMIN" && (
-          <>
-            <p className="text-sm text-slate-500">Costo materiales: {formatCLP(costoMateriales)}</p>
-            <p className="text-sm text-slate-500">
-              Margen: <span className={margen >= 0 ? "text-green-700" : "text-red-700"}>{formatCLP(margen)}</span>
-            </p>
-          </>
-        )}
-        <p className="text-lg font-bold text-slate-900">Total: {formatCLP(total)}</p>
+      {!esTecnico && (
+        <div className="flex flex-col items-end gap-1 mb-6">
+          {user.rol === "ADMIN" && (
+            <>
+              <p className="text-sm text-slate-500">Costo materiales: {formatCLP(costoMateriales)}</p>
+              <p className="text-sm text-slate-500">
+                Margen: <span className={margen >= 0 ? "text-green-700" : "text-red-700"}>{formatCLP(margen)}</span>
+              </p>
+            </>
+          )}
+          <p className="text-lg font-bold text-slate-900">Total: {formatCLP(total)}</p>
+        </div>
+      )}
+
+      <div className="bg-white rounded-lg shadow p-4 mb-4">
+        <h2 className="text-sm font-semibold text-slate-700 mb-3">Checklist de ingreso</h2>
+        <ChecklistForm
+          ordenId={orden.id}
+          checklist={
+            orden.checklist
+              ? {
+                  kilometraje: orden.checklist.kilometraje,
+                  observaciones: orden.checklist.observaciones,
+                  items: orden.checklist.items,
+                  presiones: orden.checklist.presiones.map((p) => ({
+                    posicion: p.posicion,
+                    estado: p.estado,
+                    recomendada: p.recomendada != null ? Number(p.recomendada) : null,
+                    medida: p.medida != null ? Number(p.medida) : null,
+                  })),
+                  danos: orden.checklist.danos.map((d) => ({
+                    tipo: d.tipo,
+                    x: Number(d.x),
+                    y: Number(d.y),
+                    nota: d.nota,
+                  })),
+                }
+              : null
+          }
+        />
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-4 mb-4">
+        <h2 className="text-sm font-semibold text-slate-700 mb-3">Archivos adjuntos</h2>
+        <ArchivosOrden ordenId={orden.id} archivos={orden.archivos} />
       </div>
     </div>
   );

@@ -28,7 +28,8 @@ export default async function UsuariosPage() {
                 {u.nombre} {!u.activo && <Badge color="gray">Inactivo</Badge>}
               </p>
               <p className="text-sm text-slate-500">
-                {u.email} · <Badge color={u.rol === "ADMIN" ? "blue" : "gray"}>{u.rol}</Badge>
+                {u.email} ·{" "}
+                <Badge color={u.rol === "ADMIN" ? "blue" : u.rol === "TECNICO" ? "yellow" : "gray"}>{u.rol}</Badge>
               </p>
             </div>
             <Link href={`/panel/usuarios/${u.id}`} className="text-green-700 text-sm hover:underline">

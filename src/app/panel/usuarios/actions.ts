@@ -16,6 +16,7 @@ export async function crearUsuario(_prevState: string | undefined, formData: For
     rol: formData.get("rol"),
     activo: formData.get("activo"),
     password: formData.get("password"),
+    trabajadorId: formData.get("trabajadorId") || undefined,
   });
 
   if (!parsed.success) {
@@ -27,6 +28,15 @@ export async function crearUsuario(_prevState: string | undefined, formData: For
     return "Ya existe un usuario con ese email";
   }
 
+  if (parsed.data.rol === "TECNICO") {
+    const trabajadorOcupado = await prisma.usuario.findUnique({
+      where: { trabajadorId: parsed.data.trabajadorId },
+    });
+    if (trabajadorOcupado) {
+      return "Ese trabajador ya tiene un usuario técnico asignado";
+    }
+  }
+
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
 
   await prisma.usuario.create({
@@ -36,6 +46,7 @@ export async function crearUsuario(_prevState: string | undefined, formData: For
       rol: parsed.data.rol,
       activo: parsed.data.activo ?? true,
       passwordHash,
+      trabajadorId: parsed.data.rol === "TECNICO" ? parsed.data.trabajadorId : null,
     },
   });
 
@@ -51,6 +62,7 @@ export async function actualizarUsuario(id: string, _prevState: string | undefin
     email: formData.get("email"),
     rol: formData.get("rol"),
     activo: formData.get("activo"),
+    trabajadorId: formData.get("trabajadorId") || undefined,
   });
 
   if (!parsed.success) {
@@ -69,6 +81,15 @@ export async function actualizarUsuario(id: string, _prevState: string | undefin
     return "Ya existe otro usuario con ese email";
   }
 
+  if (parsed.data.rol === "TECNICO") {
+    const trabajadorOcupado = await prisma.usuario.findFirst({
+      where: { trabajadorId: parsed.data.trabajadorId, NOT: { id } },
+    });
+    if (trabajadorOcupado) {
+      return "Ese trabajador ya tiene un usuario técnico asignado";
+    }
+  }
+
   await prisma.usuario.update({
     where: { id },
     data: {
@@ -76,6 +97,7 @@ export async function actualizarUsuario(id: string, _prevState: string | undefin
       email: parsed.data.email,
       rol: parsed.data.rol,
       activo: parsed.data.activo ?? false,
+      trabajadorId: parsed.data.rol === "TECNICO" ? parsed.data.trabajadorId : null,
     },
   });
 

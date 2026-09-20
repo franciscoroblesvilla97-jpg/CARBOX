@@ -1,14 +1,25 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { crearUsuario, actualizarUsuario } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/input";
 import type { Usuario } from "@prisma/client";
 
-export function UsuarioForm({ usuario, esUsuarioActual }: { usuario?: Usuario; esUsuarioActual?: boolean }) {
+type TrabajadorOpcion = { id: string; nombre: string };
+
+export function UsuarioForm({
+  usuario,
+  esUsuarioActual,
+  trabajadores,
+}: {
+  usuario?: Usuario;
+  esUsuarioActual?: boolean;
+  trabajadores: TrabajadorOpcion[];
+}) {
   const action = usuario ? actualizarUsuario.bind(null, usuario.id) : crearUsuario;
   const [error, formAction, pending] = useActionState(action, undefined);
+  const [rol, setRol] = useState(usuario?.rol ?? "EMPLEADO");
 
   return (
     <form action={formAction} className="max-w-md space-y-2">
@@ -24,11 +35,27 @@ export function UsuarioForm({ usuario, esUsuarioActual }: { usuario?: Usuario; e
         </Field>
       )}
       <Field label="Rol">
-        <Select name="rol" defaultValue={usuario?.rol ?? "EMPLEADO"}>
+        <Select name="rol" value={rol} onChange={(e) => setRol(e.target.value as typeof rol)}>
           <option value="EMPLEADO">Empleado</option>
+          <option value="TECNICO">Técnico</option>
           <option value="ADMIN">Administrador</option>
         </Select>
       </Field>
+      {rol === "TECNICO" && (
+        <Field label="Trabajador vinculado">
+          <Select name="trabajadorId" defaultValue={usuario?.trabajadorId ?? ""} required>
+            <option value="">Selecciona un trabajador</option>
+            {trabajadores.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.nombre}
+              </option>
+            ))}
+          </Select>
+          <p className="mt-1 text-xs text-slate-400">
+            Este técnico verá solo las órdenes asignadas a este trabajador, sin precios ni valores.
+          </p>
+        </Field>
+      )}
       <label className="flex items-center gap-2 text-sm text-slate-700 mb-4">
         <input type="checkbox" name="activo" defaultChecked={usuario?.activo ?? true} />
         Usuario activo (puede iniciar sesión)

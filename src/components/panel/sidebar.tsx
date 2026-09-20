@@ -5,22 +5,29 @@ import { usePathname } from "next/navigation";
 import type { Rol } from "@prisma/client";
 import { signOutAction } from "@/app/panel/actions";
 
-type NavItem = { href: string; label: string; adminOnly?: boolean };
+type NavItem = { href: string; label: string; roles: Rol[] };
 
 const navItems: NavItem[] = [
-  { href: "/panel/dashboard", label: "Dashboard" },
-  { href: "/panel/clientes", label: "Clientes" },
-  { href: "/panel/inventario", label: "Inventario" },
-  { href: "/panel/servicios", label: "Servicios" },
-  { href: "/panel/trabajadores", label: "Trabajadores" },
-  { href: "/panel/puestos", label: "Puestos" },
-  { href: "/panel/especificaciones", label: "Ficha técnica" },
-  { href: "/panel/ordenes", label: "Órdenes de trabajo" },
-  { href: "/panel/cotizaciones", label: "Cotizaciones" },
-  { href: "/panel/agendamientos", label: "Agendamientos" },
-  { href: "/panel/reportes", label: "Reportes", adminOnly: true },
-  { href: "/panel/usuarios", label: "Usuarios", adminOnly: true },
+  { href: "/panel/dashboard", label: "Dashboard", roles: ["ADMIN", "EMPLEADO"] },
+  { href: "/panel/clientes", label: "Clientes", roles: ["ADMIN", "EMPLEADO"] },
+  { href: "/panel/inventario", label: "Inventario", roles: ["ADMIN", "EMPLEADO"] },
+  { href: "/panel/servicios", label: "Servicios", roles: ["ADMIN", "EMPLEADO"] },
+  { href: "/panel/trabajadores", label: "Trabajadores", roles: ["ADMIN", "EMPLEADO"] },
+  { href: "/panel/puestos", label: "Puestos", roles: ["ADMIN", "EMPLEADO"] },
+  { href: "/panel/especificaciones", label: "Ficha técnica", roles: ["ADMIN", "EMPLEADO"] },
+  { href: "/panel/ordenes", label: "Órdenes de trabajo", roles: ["ADMIN", "EMPLEADO"] },
+  { href: "/panel/ordenes", label: "Mis órdenes", roles: ["TECNICO"] },
+  { href: "/panel/cotizaciones", label: "Cotizaciones", roles: ["ADMIN", "EMPLEADO"] },
+  { href: "/panel/agendamientos", label: "Agendamientos", roles: ["ADMIN", "EMPLEADO"] },
+  { href: "/panel/reportes", label: "Reportes", roles: ["ADMIN"] },
+  { href: "/panel/usuarios", label: "Usuarios", roles: ["ADMIN"] },
 ];
+
+const etiquetaRol: Record<Rol, string> = {
+  ADMIN: "Administrador",
+  EMPLEADO: "Empleado",
+  TECNICO: "Técnico",
+};
 
 export function Sidebar({ rol, nombre }: { rol: Rol; nombre: string }) {
   const pathname = usePathname();
@@ -29,11 +36,13 @@ export function Sidebar({ rol, nombre }: { rol: Rol; nombre: string }) {
     <aside className="w-60 shrink-0 bg-slate-900 text-slate-100 min-h-screen flex flex-col print:hidden">
       <div className="px-5 py-5 border-b border-slate-800">
         <p className="text-lg font-bold">Carbox</p>
-        <p className="text-xs text-slate-400">{nombre} · {rol === "ADMIN" ? "Administrador" : "Empleado"}</p>
+        <p className="text-xs text-slate-400">
+          {nombre} · {etiquetaRol[rol]}
+        </p>
       </div>
       <nav className="flex-1 py-4">
         {navItems
-          .filter((item) => !item.adminOnly || rol === "ADMIN")
+          .filter((item) => item.roles.includes(rol))
           .map((item) => {
             const active = pathname.startsWith(item.href);
             return (

@@ -11,6 +11,7 @@ declare module "next-auth" {
       nombre: string;
       email: string;
       rol: Rol;
+      trabajadorId: string | null;
     };
   }
 }
@@ -19,6 +20,7 @@ type AppToken = {
   id: string;
   nombre: string;
   rol: Rol;
+  trabajadorId: string | null;
 };
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -51,6 +53,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: usuario.nombre,
           email: usuario.email,
           rol: usuario.rol,
+          trabajadorId: usuario.trabajadorId,
         };
       },
     }),
@@ -62,6 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         t.id = user.id as string;
         t.nombre = user.name as string;
         t.rol = (user as { rol: Rol }).rol;
+        t.trabajadorId = (user as { trabajadorId: string | null }).trabajadorId;
       }
       return t;
     },
@@ -70,6 +74,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.id = t.id;
       session.user.nombre = t.nombre;
       session.user.rol = t.rol;
+      session.user.trabajadorId = t.trabajadorId;
       return session;
     },
   },

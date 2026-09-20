@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { EstadoOrden } from "@prisma/client";
 import { notificarOrdenCompletada } from "@/lib/notificaciones";
+import { checklistOrdenSchema, zonaDesdeCoordenadas } from "@/lib/validations/checklist";
+import { put, del } from "@vercel/blob";
 
 export async function crearOrdenTrabajo(_prevState: string | undefined, formData: FormData) {
   const user = await requireSession();
@@ -127,6 +129,18 @@ async function requireOrdenEditable(id: string) {
   return orden;
 }
 
+/** Un TECNICO solo puede actuar sobre las órdenes que tiene asignadas. */
+async function requireAccesoOrden(ordenId: string) {
+  const user = await requireSession();
+  if (user.rol === "TECNICO") {
+    const orden = await prisma.ordenTrabajo.findUniqueOrThrow({ where: { id: ordenId } });
+    if (orden.trabajadorId !== user.trabajadorId) {
+      throw new Error("No autorizado");
+    }
+  }
+  return user;
+}
+
 export async function agregarServicioAOrden(ordenId: string, _prevState: string | undefined, formData: FormData) {
   await requireSession();
   await requireOrdenEditable(ordenId);
@@ -244,7 +258,7 @@ export async function reasignarOrden(id: string, _prevState: string | undefined,
 }
 
 export async function actualizarEstadoOrden(id: string, estado: EstadoOrden) {
-  await requireSession();
+  await requireAccesoOrden(id);
 
   const orden = await prisma.ordenTrabajo.update({
     where: { id },
@@ -298,4 +312,122 @@ export async function eliminarOrden(id: string) {
   revalidatePath("/panel/ordenes");
   revalidatePath(`/panel/vehiculos/${orden.vehiculoId}`);
   redirect("/panel/ordenes");
+}
+
+export async function guardarChecklist(ordenId: string, _prevState: string | undefined, formData: FormData) {
+  const user = await requireAccesoOrden(ordenId);
+
+  const payload = formData.get("payload");
+  if (typeof payload !== "string") return "Datos inválidos";
+
+  let json: unknown;
+  try {
+    json = JSON.parse(payload);
+  } catch {
+    return "Datos inválidos";
+  }
+
+  const parsed = checklistOrdenSchema.safeParse(json);
+  if (!parsed.success) return parsed.error.issues[0]?.message ?? "Datos inválidos";
+  const data = parsed.data;
+
+  await prisma.$transaction(async (tx) => {
+    const checklist = await tx.checklistOrden.upsert({
+      where: { ordenTrabajoId: ordenId },
+      create: {
+        ordenTrabajoId: ordenId,
+        kilometraje: data.kilometraje ?? null,
+        observaciones: data.observaciones || null,
+        completadoPorId: user.rol === "TECNICO" ? user.trabajadorId : null,
+        completadoEn: new Date(),
+      },
+      update: {
+        kilometraje: data.kilometraje ?? null,
+        observaciones: data.observaciones || null,
+        completadoPorId: user.rol === "TECNICO" ? user.trabajadorId : null,
+        completadoEn: new Date(),
+      },
+    });
+
+    await tx.checklistItem.deleteMany({ where: { checklistOrdenId: checklist.id } });
+    await tx.presionNeumatico.deleteMany({ where: { checklistOrdenId: checklist.id } });
+    await tx.marcaCarroceria.deleteMany({ where: { checklistOrdenId: checklist.id } });
+
+    await tx.checklistItem.createMany({
+      data: data.items.map((i) => ({ ...i, checklistOrdenId: checklist.id })),
+    });
+    await tx.presionNeumatico.createMany({
+      data: data.presiones.map((p) => ({ ...p, checklistOrdenId: checklist.id })),
+    });
+    if (data.danos.length > 0) {
+      await tx.marcaCarroceria.createMany({
+        data: data.danos.map((d) => ({
+          tipo: d.tipo,
+          x: d.x,
+          y: d.y,
+          zona: zonaDesdeCoordenadas(d.x, d.y),
+          nota: d.nota || null,
+          checklistOrdenId: checklist.id,
+        })),
+      });
+    }
+  });
+
+  revalidatePath(`/panel/ordenes/${ordenId}`);
+  revalidatePath(`/panel/ordenes/${ordenId}/informe`);
+  return "Checklist guardado";
+}
+
+const TIPOS_ARCHIVO_PERMITIDOS = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+const TAMANO_MAXIMO_ARCHIVO = 10 * 1024 * 1024; // 10 MB
+
+export async function subirArchivoOrden(ordenId: string, _prevState: string | undefined, formData: FormData) {
+  const user = await requireAccesoOrden(ordenId);
+
+  const archivo = formData.get("archivo");
+  if (!(archivo instanceof File) || archivo.size === 0) {
+    return "Selecciona un archivo";
+  }
+  if (!TIPOS_ARCHIVO_PERMITIDOS.includes(archivo.type)) {
+    return "Solo se aceptan PDF o imágenes (jpg, png, webp)";
+  }
+  if (archivo.size > TAMANO_MAXIMO_ARCHIVO) {
+    return "El archivo no puede superar los 10 MB";
+  }
+
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return "Almacenamiento de archivos no configurado. Avísale al administrador.";
+  }
+
+  const blob = await put(`ordenes/${ordenId}/${archivo.name}`, archivo, {
+    access: "public",
+    addRandomSuffix: true,
+  });
+
+  await prisma.archivoOrden.create({
+    data: {
+      ordenTrabajoId: ordenId,
+      nombre: archivo.name,
+      url: blob.url,
+      tipo: archivo.type,
+      subidoPorId: user.rol === "TECNICO" ? user.trabajadorId : null,
+    },
+  });
+
+  revalidatePath(`/panel/ordenes/${ordenId}`);
+  revalidatePath(`/panel/ordenes/${ordenId}/informe`);
+  return undefined;
+}
+
+export async function eliminarArchivoOrden(id: string) {
+  const archivo = await prisma.archivoOrden.findUniqueOrThrow({ where: { id } });
+  await requireAccesoOrden(archivo.ordenTrabajoId);
+
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    await del(archivo.url).catch(() => {});
+  }
+  await prisma.archivoOrden.delete({ where: { id } });
+
+  revalidatePath(`/panel/ordenes/${archivo.ordenTrabajoId}`);
+  revalidatePath(`/panel/ordenes/${archivo.ordenTrabajoId}/informe`);
 }

@@ -3,6 +3,19 @@ import { prisma } from "@/lib/prisma";
 import { formatCLP, formatFechaCorta } from "@/lib/format";
 import { InformeHeader } from "@/components/public/informe-header";
 import { CornerFrame } from "@/components/public/home/corner-frame";
+import type { EstadoChecklist } from "@prisma/client";
+
+const estadoChecklistLabel: Record<EstadoChecklist, string> = {
+  OK: "OK",
+  VIDA_UTIL: "Vida útil",
+  CAMBIO: "Cambio",
+};
+// Mismos colores semánticos que el handoff de diseño: verde OK, ámbar vida útil, rojo cambio.
+const estadoChecklistEstilo: Record<EstadoChecklist, React.CSSProperties> = {
+  OK: { color: "#3f7d55", backgroundColor: "#eaf4ee" },
+  VIDA_UTIL: { color: "#b8860b", backgroundColor: "#f8f1e0" },
+  CAMBIO: { color: "#a63327", backgroundColor: "#faeceb" },
+};
 
 export default async function InformeOrdenPublicoPage({
   params,
@@ -18,6 +31,14 @@ export default async function InformeOrdenPublicoPage({
       trabajador: true,
       servicios: { include: { servicio: true } },
       productos: { include: { producto: true } },
+      checklist: {
+        include: {
+          items: { orderBy: { orden: "asc" } },
+          presiones: { orderBy: { orden: "asc" } },
+          danos: true,
+        },
+      },
+      archivos: { orderBy: { createdAt: "asc" } },
     },
   });
 
@@ -124,11 +145,122 @@ export default async function InformeOrdenPublicoPage({
             </div>
           )}
 
-          <div className="flex justify-end border-t border-ink/16 pt-4">
+          <div className="flex justify-end border-t border-ink/16 pt-4 mb-6">
             <p className="font-[family-name:var(--font-barlow-condensed)] font-bold text-[24px]">
               Total: {formatCLP(total)}
             </p>
           </div>
+
+          {orden.checklist && (
+            <div className="border-t border-ink/16 pt-6 mb-6">
+              <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-neutral-500 mb-3">
+                Revisión de ingreso
+              </p>
+
+              {orden.checklist.kilometraje != null && (
+                <p className="text-[14px] text-neutral-600 mb-3">
+                  Kilometraje registrado: {orden.checklist.kilometraje} km
+                </p>
+              )}
+
+              <table className="w-full text-[14px] mb-4">
+                <thead>
+                  <tr className="text-left text-[11px] font-semibold tracking-[0.16em] uppercase text-neutral-500 border-b border-ink/16">
+                    <th className="pb-2">Punto revisado</th>
+                    <th className="pb-2">Estado</th>
+                    <th className="pb-2">Observación</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ink/10">
+                  {orden.checklist.items.map((item) => (
+                    <tr key={item.id}>
+                      <td className="py-1.5">{item.nombre}</td>
+                      <td className="py-1.5">
+                        <span
+                          className="inline-block px-[6px] py-[2px] text-[11px] font-semibold uppercase"
+                          style={estadoChecklistEstilo[item.estado]}
+                        >
+                          {estadoChecklistLabel[item.estado]}
+                        </span>
+                      </td>
+                      <td className="py-1.5 text-neutral-600">{item.observacion ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <table className="w-full text-[14px] mb-4">
+                <thead>
+                  <tr className="text-left text-[11px] font-semibold tracking-[0.16em] uppercase text-neutral-500 border-b border-ink/16">
+                    <th className="pb-2">Neumático</th>
+                    <th className="pb-2 text-right">Recomendada</th>
+                    <th className="pb-2 text-right">Medida</th>
+                    <th className="pb-2">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ink/10">
+                  {orden.checklist.presiones.map((p) => (
+                    <tr key={p.id}>
+                      <td className="py-1.5">{p.posicion}</td>
+                      <td className="py-1.5 text-right">{p.recomendada != null ? `${p.recomendada} psi` : "—"}</td>
+                      <td className="py-1.5 text-right">{p.medida != null ? `${p.medida} psi` : "—"}</td>
+                      <td className="py-1.5">
+                        <span
+                          className="inline-block px-[6px] py-[2px] text-[11px] font-semibold uppercase"
+                          style={estadoChecklistEstilo[p.estado]}
+                        >
+                          {estadoChecklistLabel[p.estado]}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {orden.checklist.danos.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-neutral-500 mb-1">
+                    Carrocería
+                  </p>
+                  <ul className="text-[14px] text-neutral-600 list-disc list-inside">
+                    {orden.checklist.danos.map((d) => (
+                      <li key={d.id}>
+                        {d.tipo === "GOLPE" ? "Golpe" : d.tipo === "RAYON" ? "Rayón" : "Otro"} en{" "}
+                        {d.zona.toLowerCase()}
+                        {d.nota ? ` — ${d.nota}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {orden.checklist.observaciones && (
+                <div className="text-[14px]">
+                  <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-neutral-500 mb-1">
+                    Observaciones generales
+                  </p>
+                  <p className="text-ink">{orden.checklist.observaciones}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {orden.archivos.length > 0 && (
+            <div className="border-t border-ink/16 pt-6 mb-6">
+              <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-neutral-500 mb-2">
+                Archivos adjuntos
+              </p>
+              <ul className="text-[14px] space-y-1">
+                {orden.archivos.map((archivo) => (
+                  <li key={archivo.id}>
+                    <a href={archivo.url} target="_blank" rel="noopener noreferrer" className="text-accent-text hover:underline">
+                      {archivo.nombre}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <p className="text-[12px] text-neutral-500 text-center mt-10">Gracias por confiar en Carbox.</p>
         </CornerFrame>

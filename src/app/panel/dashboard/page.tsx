@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/permissions";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,7 @@ function duracionOrden(servicios: (OrdenTrabajoServicio & { servicio: Servicio |
 
 export default async function DashboardPage() {
   const user = await requireSession();
+  if (user.rol === "TECNICO") redirect("/panel/ordenes");
 
   const inicioAyer = inicioDelDia(-1);
   const inicioHoy = inicioDelDia(0);

@@ -3,6 +3,19 @@ import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/permissions";
 import { formatCLP, formatFechaCorta } from "@/lib/format";
 import { ImprimirButton } from "@/components/ui/imprimir-button";
+import { Badge } from "@/components/ui/badge";
+import type { EstadoChecklist } from "@prisma/client";
+
+const estadoChecklistLabel: Record<EstadoChecklist, string> = {
+  OK: "OK",
+  VIDA_UTIL: "Vida útil",
+  CAMBIO: "Cambio",
+};
+const estadoChecklistColor: Record<EstadoChecklist, "green" | "yellow" | "red"> = {
+  OK: "green",
+  VIDA_UTIL: "yellow",
+  CAMBIO: "red",
+};
 
 export default async function InformeOrdenPage({
   params,
@@ -19,6 +32,14 @@ export default async function InformeOrdenPage({
       trabajador: true,
       servicios: { include: { servicio: true } },
       productos: { include: { producto: true } },
+      checklist: {
+        include: {
+          items: { orderBy: { orden: "asc" } },
+          presiones: { orderBy: { orden: "asc" } },
+          danos: true,
+        },
+      },
+      archivos: { orderBy: { createdAt: "asc" } },
     },
   });
 
@@ -126,9 +147,100 @@ export default async function InformeOrdenPage({
           </div>
         )}
 
-        <div className="flex justify-end border-t border-slate-200 pt-4">
+        <div className="flex justify-end border-t border-slate-200 pt-4 mb-6">
           <p className="text-xl font-bold text-slate-900">Total: {formatCLP(total)}</p>
         </div>
+
+        {orden.checklist && (
+          <div className="border-t border-slate-200 pt-6 mb-6">
+            <p className="text-slate-400 uppercase text-xs mb-3">Revisión de ingreso</p>
+
+            {orden.checklist.kilometraje != null && (
+              <p className="text-sm text-slate-600 mb-3">Kilometraje registrado: {orden.checklist.kilometraje} km</p>
+            )}
+
+            <table className="w-full text-sm mb-4">
+              <thead>
+                <tr className="text-left text-xs text-slate-400 border-b border-slate-200">
+                  <th className="pb-2">Punto revisado</th>
+                  <th className="pb-2">Estado</th>
+                  <th className="pb-2">Observación</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {orden.checklist.items.map((item) => (
+                  <tr key={item.id}>
+                    <td className="py-1.5">{item.nombre}</td>
+                    <td className="py-1.5">
+                      <Badge color={estadoChecklistColor[item.estado]}>{estadoChecklistLabel[item.estado]}</Badge>
+                    </td>
+                    <td className="py-1.5 text-slate-500">{item.observacion ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <table className="w-full text-sm mb-4">
+              <thead>
+                <tr className="text-left text-xs text-slate-400 border-b border-slate-200">
+                  <th className="pb-2">Neumático</th>
+                  <th className="pb-2 text-right">Recomendada</th>
+                  <th className="pb-2 text-right">Medida</th>
+                  <th className="pb-2">Estado</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {orden.checklist.presiones.map((p) => (
+                  <tr key={p.id}>
+                    <td className="py-1.5">{p.posicion}</td>
+                    <td className="py-1.5 text-right">{p.recomendada != null ? `${p.recomendada} psi` : "—"}</td>
+                    <td className="py-1.5 text-right">{p.medida != null ? `${p.medida} psi` : "—"}</td>
+                    <td className="py-1.5">
+                      <Badge color={estadoChecklistColor[p.estado]}>{estadoChecklistLabel[p.estado]}</Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {orden.checklist.danos.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs text-slate-400 mb-1">Carrocería</p>
+                <ul className="text-sm text-slate-600 list-disc list-inside">
+                  {orden.checklist.danos.map((d) => (
+                    <li key={d.id}>
+                      {d.tipo === "GOLPE" ? "Golpe" : d.tipo === "RAYON" ? "Rayón" : "Otro"} en{" "}
+                      {d.zona.toLowerCase()}
+                      {d.nota ? ` — ${d.nota}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {orden.checklist.observaciones && (
+              <div className="text-sm">
+                <p className="text-xs text-slate-400 mb-1">Observaciones generales</p>
+                <p className="text-slate-700">{orden.checklist.observaciones}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {orden.archivos.length > 0 && (
+          <div className="border-t border-slate-200 pt-6 mb-6">
+            <p className="text-slate-400 uppercase text-xs mb-2">Archivos adjuntos</p>
+            <ul className="text-sm space-y-1">
+              {orden.archivos.map((archivo) => (
+                <li key={archivo.id}>
+                  <a href={archivo.url} target="_blank" rel="noopener noreferrer" className="text-green-700 hover:underline">
+                    {archivo.nombre}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <p className="text-xs text-slate-400 text-center mt-10">Gracias por confiar en Carbox.</p>
       </div>

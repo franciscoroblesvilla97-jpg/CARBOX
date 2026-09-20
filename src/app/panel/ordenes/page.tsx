@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { requireSession } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatFecha } from "@/lib/format";
@@ -12,7 +13,11 @@ const estadoColor = {
 } as const;
 
 export default async function OrdenesPage() {
+  const user = await requireSession();
+  const esTecnico = user.rol === "TECNICO";
+
   const ordenes = await prisma.ordenTrabajo.findMany({
+    where: esTecnico ? { trabajadorId: user.trabajadorId ?? "__ninguno__" } : undefined,
     orderBy: { fechaProgramada: "desc" },
     include: { vehiculo: { include: { cliente: true } } },
   });
@@ -20,10 +25,12 @@ export default async function OrdenesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Órdenes de trabajo</h1>
-        <Link href="/panel/ordenes/nueva">
-          <Button>Nueva orden</Button>
-        </Link>
+        <h1 className="text-2xl font-bold text-slate-900">{esTecnico ? "Mis órdenes" : "Órdenes de trabajo"}</h1>
+        {!esTecnico && (
+          <Link href="/panel/ordenes/nueva">
+            <Button>Nueva orden</Button>
+          </Link>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">

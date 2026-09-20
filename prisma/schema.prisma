@@ -11,6 +11,19 @@ generator client {
 enum Rol {
   ADMIN
   EMPLEADO
+  TECNICO
+}
+
+enum EstadoChecklist {
+  OK // correcto
+  VIDA_UTIL // con vida útil aún, se monitorea
+  CAMBIO // se recomienda cambio
+}
+
+enum TipoDanoCarroceria {
+  GOLPE
+  RAYON
+  OTRO
 }
 
 enum EstadoOrden {
@@ -54,6 +67,10 @@ model Usuario {
   passwordHash        String
   rol                 Rol                    @default(EMPLEADO)
   activo              Boolean                @default(true)
+  // Solo para rol TECNICO: vincula el login al Trabajador que ya se usa para
+  // asignar órdenes, así el técnico ve solo lo suyo.
+  trabajadorId        String?                @unique
+  trabajador          Trabajador?            @relation(fields: [trabajadorId], references: [id])
   createdAt           DateTime               @default(now())
   ordenesCreadas      OrdenTrabajo[]         @relation("CreadaPor")
   cotizacionesCreadas Cotizacion[]           @relation("CotizacionCreadaPor")
@@ -121,11 +138,14 @@ model Servicio {
 }
 
 model Trabajador {
-  id        String         @id @default(cuid())
-  nombre    String
-  activo    Boolean        @default(true)
-  createdAt DateTime       @default(now())
-  ordenes   OrdenTrabajo[]
+  id                    String           @id @default(cuid())
+  nombre                String
+  activo                Boolean          @default(true)
+  createdAt             DateTime         @default(now())
+  ordenes               OrdenTrabajo[]
+  usuario               Usuario?
+  checklistsCompletados ChecklistOrden[]
+  archivosSubidos       ArchivoOrden[]
 }
 
 model Puesto {
@@ -138,30 +158,32 @@ model Puesto {
 }
 
 model OrdenTrabajo {
-  id                 String                 @id @default(cuid())
-  numero             Int                    @unique
-  vehiculoId         String
-  vehiculo           Vehiculo               @relation(fields: [vehiculoId], references: [id])
-  estado             EstadoOrden            @default(PENDIENTE)
-  observaciones      String?
-  creadoPorId        String
-  creadoPor          Usuario                @relation("CreadaPor", fields: [creadoPorId], references: [id])
-  trabajadorId       String?
-  trabajador         Trabajador?            @relation(fields: [trabajadorId], references: [id])
-  puestoId           String?
-  puesto             Puesto?                @relation(fields: [puestoId], references: [id])
-  solicitudOrigenId  String?                @unique
-  solicitudOrigen    SolicitudAgendamiento? @relation(fields: [solicitudOrigenId], references: [id])
-  cotizacionOrigenId String?                @unique
-  cotizacionOrigen   Cotizacion?            @relation(fields: [cotizacionOrigenId], references: [id])
-  fechaIngreso       DateTime               @default(now())
-  fechaProgramada    DateTime               @default(now())
-  fechaCierre        DateTime?
-  tokenPublico       String                 @unique @default(cuid())
-  recordatorioEnviado Boolean               @default(false)
-  confirmadoCliente  Boolean                @default(false)
-  servicios          OrdenTrabajoServicio[]
-  productos          OrdenTrabajoProducto[]
+  id                  String                 @id @default(cuid())
+  numero              Int                    @unique
+  vehiculoId          String
+  vehiculo            Vehiculo               @relation(fields: [vehiculoId], references: [id])
+  estado              EstadoOrden            @default(PENDIENTE)
+  observaciones       String?
+  creadoPorId         String
+  creadoPor           Usuario                @relation("CreadaPor", fields: [creadoPorId], references: [id])
+  trabajadorId        String?
+  trabajador          Trabajador?            @relation(fields: [trabajadorId], references: [id])
+  puestoId            String?
+  puesto              Puesto?                @relation(fields: [puestoId], references: [id])
+  solicitudOrigenId   String?                @unique
+  solicitudOrigen     SolicitudAgendamiento? @relation(fields: [solicitudOrigenId], references: [id])
+  cotizacionOrigenId  String?                @unique
+  cotizacionOrigen    Cotizacion?            @relation(fields: [cotizacionOrigenId], references: [id])
+  fechaIngreso        DateTime               @default(now())
+  fechaProgramada     DateTime               @default(now())
+  fechaCierre         DateTime?
+  tokenPublico        String                 @unique @default(cuid())
+  recordatorioEnviado Boolean                @default(false)
+  confirmadoCliente   Boolean                @default(false)
+  servicios           OrdenTrabajoServicio[]
+  productos           OrdenTrabajoProducto[]
+  checklist           ChecklistOrden?
+  archivos            ArchivoOrden[]
 }
 
 model OrdenTrabajoServicio {
@@ -284,4 +306,90 @@ model MovimientoInventario {
   usuarioId     String
   usuario       Usuario                  @relation(fields: [usuarioId], references: [id])
   createdAt     DateTime                 @default(now())
+}
+
+// ============================================================================
+// Checklist de ingreso — adjunto 1-a-1 a la orden de trabajo. El técnico lo
+// llena al recibir el vehículo; alimenta el informe final del cliente.
+// ============================================================================
+
+model ChecklistOrden {
+  id             String       @id @default(cuid())
+  ordenTrabajoId String       @unique
+  ordenTrabajo   OrdenTrabajo @relation(fields: [ordenTrabajoId], references: [id], onDelete: Cascade)
+
+  kilometraje   Int?
+  observaciones String?
+
+  completadoPorId String?
+  completadoPor   Trabajador? @relation(fields: [completadoPorId], references: [id])
+  completadoEn    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items     ChecklistItem[]
+  presiones PresionNeumatico[]
+  danos     MarcaCarroceria[]
+}
+
+model ChecklistItem {
+  id               String         @id @default(cuid())
+  checklistOrdenId String
+  checklistOrden   ChecklistOrden @relation(fields: [checklistOrdenId], references: [id], onDelete: Cascade)
+
+  // Nombre del punto revisado ("Frenos", "Suspensión"...). Se guarda como texto,
+  // no como catálogo: la lista de 14 puntos puede cambiar sin migración.
+  nombre      String
+  estado      EstadoChecklist @default(OK)
+  observacion String?
+  orden       Int             @default(0)
+
+  @@index([checklistOrdenId, orden])
+}
+
+model PresionNeumatico {
+  id               String         @id @default(cuid())
+  checklistOrdenId String
+  checklistOrden   ChecklistOrden @relation(fields: [checklistOrdenId], references: [id], onDelete: Cascade)
+
+  posicion    String // "Delantera izquierda", "Repuesto (si aplica)"...
+  recomendada Decimal? // psi
+  medida      Decimal? // psi
+  estado      EstadoChecklist @default(OK)
+  orden       Int             @default(0)
+
+  @@index([checklistOrdenId, orden])
+}
+
+model MarcaCarroceria {
+  id               String         @id @default(cuid())
+  checklistOrdenId String
+  checklistOrden   ChecklistOrden @relation(fields: [checklistOrdenId], references: [id], onDelete: Cascade)
+
+  tipo TipoDanoCarroceria @default(GOLPE)
+
+  // Coordenadas en porcentaje (0-100) sobre el plano del vehículo, no en px,
+  // para que la marca caiga en el mismo punto a cualquier tamaño de pantalla.
+  x Decimal
+  y Decimal
+
+  // Zona derivada de x/y al guardar ("Frente izquierdo", "Costado derecho"...).
+  zona String
+  nota String?
+}
+
+model ArchivoOrden {
+  id             String       @id @default(cuid())
+  ordenTrabajoId String
+  ordenTrabajo   OrdenTrabajo @relation(fields: [ordenTrabajoId], references: [id], onDelete: Cascade)
+
+  nombre String
+  url    String
+  tipo   String?
+
+  subidoPorId String?
+  subidoPor   Trabajador? @relation(fields: [subidoPorId], references: [id])
+
+  createdAt DateTime @default(now())
 }
