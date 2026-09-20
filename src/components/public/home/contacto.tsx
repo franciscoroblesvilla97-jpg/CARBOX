@@ -1,6 +1,11 @@
 import { TELEFONO_CARBOX, whatsappUrl } from "@/lib/whatsapp";
 import { CornerFrame } from "./corner-frame";
 
+const MAPS_EMBED_SRC =
+  "https://www.google.com/maps?q=" +
+  encodeURIComponent("Carbox, Pedro de Valdivia 525, Concepción, Chile") +
+  "&output=embed";
+
 export function Contacto() {
   return (
     <section
@@ -31,8 +36,17 @@ export function Contacto() {
             </a>
           </div>
         </div>
-        <CornerFrame dark className="aspect-16/10 flex items-end p-4 bg-[repeating-linear-gradient(135deg,rgba(242,242,243,0.08),rgba(242,242,243,0.08)_10px,transparent_10px,transparent_20px)]">
-          <span className="text-[12px] text-neutral-300">Mapa o fachada del local</span>
+        <CornerFrame dark className="aspect-16/10">
+          <div className="w-full h-full overflow-hidden">
+            <iframe
+              src={MAPS_EMBED_SRC}
+              title="Ubicación de Carbox en el mapa"
+              className="w-full h-full grayscale-[0.3] contrast-125"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
         </CornerFrame>
       </div>
     </section>

@@ -8,50 +8,43 @@ const DIRECCION = "Pedro de Valdivia 525, Concepción";
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Carbox ${DIRECCION}, Chile`)}`;
 
 /**
- * Envía un mensaje de WhatsApp usando una plantilla aprobada de Meta Cloud API.
- * Fuera de una conversación iniciada por el cliente en las últimas 24h, WhatsApp
- * exige que los mensajes que inicia el negocio usen una plantilla pre-aprobada
- * (no texto libre) — por eso aquí siempre se envía por plantilla, nunca texto plano.
+ * Envía un WhatsApp vía la API de Twilio. Mientras se use el Sandbox de Twilio,
+ * el destinatario debe haberse unido primero (mensaje "join <código>" al número
+ * del sandbox) — fuera del sandbox, con un WhatsApp Sender propio aprobado, un
+ * mensaje que el negocio inicia (fuera de una conversación de las últimas 24h)
+ * igual requiere una plantilla aprobada por WhatsApp; ese paso queda pendiente
+ * para cuando se solicite un Sender de producción.
  */
-async function enviarWhatsAppTemplate(telefono: string, templateName: string, parametros: string[]) {
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+async function enviarWhatsApp(telefono: string, mensaje: string) {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const from = process.env.TWILIO_WHATSAPP_FROM;
 
-  if (!token || !phoneNumberId) {
-    console.warn(`[WhatsApp] No configurado — se omite envío de plantilla "${templateName}" a ${telefono}`);
+  if (!accountSid || !authToken || !from) {
+    console.warn(`[WhatsApp] No configurado — se omite envío a ${telefono}`);
     return;
   }
 
-  const numeroLimpio = telefono.replace(/\D/g, "");
-
   try {
-    const res = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
+    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString("base64")}`,
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        to: numeroLimpio,
-        type: "template",
-        template: {
-          name: templateName,
-          language: { code: "es" },
-          components:
-            parametros.length > 0
-              ? [{ type: "body", parameters: parametros.map((texto) => ({ type: "text", text: texto })) }]
-              : undefined,
-        },
+      body: new URLSearchParams({
+        From: `whatsapp:${from}`,
+        To: `whatsapp:${telefono}`,
+        Body: mensaje,
       }),
     });
 
     if (!res.ok) {
       const detalle = await res.text();
-      console.error(`[WhatsApp] Error enviando plantilla "${templateName}" a ${telefono}: ${res.status} ${detalle}`);
+      console.error(`[WhatsApp] Error enviando a ${telefono}: ${res.status} ${detalle}`);
     }
   } catch (error) {
-    console.error(`[WhatsApp] Excepción enviando plantilla "${templateName}" a ${telefono}:`, error);
+    console.error(`[WhatsApp] Excepción enviando a ${telefono}:`, error);
   }
 }
 
@@ -126,10 +119,9 @@ export async function notificarSolicitudConfirmada(solicitud: {
   }).format(solicitud.fechaPreferida);
 
   await Promise.all([
-    enviarWhatsAppTemplate(
+    enviarWhatsApp(
       solicitud.telefono,
-      process.env.WHATSAPP_TEMPLATE_SOLICITUD_CONFIRMADA || "solicitud_confirmada",
-      [solicitud.nombreContacto, fecha]
+      `Hola ${solicitud.nombreContacto}, confirmamos tu hora en Carbox para el ${fecha}. Te esperamos en ${DIRECCION}.`
     ),
     solicitud.email
       ? enviarEmail(
@@ -152,10 +144,9 @@ export async function notificarSolicitudRechazada(solicitud: {
   email: string | null;
 }) {
   await Promise.all([
-    enviarWhatsAppTemplate(
+    enviarWhatsApp(
       solicitud.telefono,
-      process.env.WHATSAPP_TEMPLATE_SOLICITUD_RECHAZADA || "solicitud_rechazada",
-      [solicitud.nombreContacto]
+      `Hola ${solicitud.nombreContacto}, lamentablemente no pudimos confirmar tu hora en Carbox. Contáctanos para coordinar otra fecha.`
     ),
     solicitud.email
       ? enviarEmail(
@@ -182,10 +173,9 @@ export async function notificarCotizacionLista(cotizacion: {
 
   await Promise.all([
     cotizacion.telefono
-      ? enviarWhatsAppTemplate(
+      ? enviarWhatsApp(
           cotizacion.telefono,
-          process.env.WHATSAPP_TEMPLATE_COTIZACION_LISTA || "cotizacion_lista",
-          [cotizacion.nombreCliente, String(cotizacion.numero), url]
+          `Hola ${cotizacion.nombreCliente}, tu cotización #${cotizacion.numero} en Carbox está lista: ${url}`
         )
       : Promise.resolve(),
     cotizacion.email
@@ -218,11 +208,10 @@ export async function notificarRecordatorio24h(orden: {
   const url = `${baseUrl}/reserva/${orden.tokenPublico}`;
 
   await Promise.all([
-    enviarWhatsAppTemplate(orden.telefono, process.env.WHATSAPP_TEMPLATE_RECORDATORIO || "recordatorio_hora", [
-      orden.clienteNombre,
-      fecha,
-      url,
-    ]),
+    enviarWhatsApp(
+      orden.telefono,
+      `Hola ${orden.clienteNombre}, te recordamos tu hora en Carbox para el ${fecha}. Confirma o cambia aquí: ${url}`
+    ),
     orden.email
       ? enviarEmail(
           orden.email,
@@ -247,11 +236,10 @@ export async function notificarOrdenCompletada(orden: {
   const url = `${baseUrl}/informe-orden/${orden.id}`;
 
   await Promise.all([
-    enviarWhatsAppTemplate(orden.telefono, process.env.WHATSAPP_TEMPLATE_ORDEN_COMPLETADA || "orden_completada", [
-      orden.clienteNombre,
-      String(orden.numero),
-      url,
-    ]),
+    enviarWhatsApp(
+      orden.telefono,
+      `Hola ${orden.clienteNombre}, tu vehículo está listo — OT #${orden.numero}. Ver informe: ${url}`
+    ),
     orden.email
       ? enviarEmail(
           orden.email,
