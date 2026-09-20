@@ -128,6 +128,10 @@ export async function crearSolicitudAgendamiento(_prevState: State, formData: Fo
     telefono: parsed.data.telefono,
     email: parsed.data.email || null,
     fechaPreferida,
+    servicios: servicioCoincidente
+      ? [{ nombre: servicioCoincidente.nombre, precio: Number(servicioCoincidente.precioBase) }]
+      : [],
+    total: servicioCoincidente ? Number(servicioCoincidente.precioBase) : undefined,
   });
 
   return { success: true, emailEnviado };
@@ -235,6 +239,8 @@ export async function crearSolicitudCotizador(_prevState: State, formData: FormD
     telefono: parsed.data.telefono,
     email: parsed.data.email || null,
     fechaPreferida,
+    servicios: servicios.map((s) => ({ nombre: s.nombre, precio: Number(s.precioBase) })),
+    total: servicios.reduce((acc, s) => acc + Number(s.precioBase), 0),
   });
 
   return { success: true, emailEnviado };

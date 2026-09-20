@@ -38,6 +38,7 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
   const [modelo, setModelo] = useState("");
   const [anio, setAnio] = useState("");
   const [nombreContacto, setNombreContacto] = useState("");
+  const [email, setEmail] = useState("");
   const [digitosTelefono, setDigitosTelefono] = useState("");
   const telefono = digitosTelefono ? `+569${digitosTelefono}` : "";
 
@@ -124,6 +125,7 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
         <input type="hidden" name="modelo" value={modelo} />
         <input type="hidden" name="anio" value={anio} />
         <input type="hidden" name="nombreContacto" value={nombreContacto} />
+        <input type="hidden" name="email" value={email} />
         <input type="hidden" name="telefono" value={telefono} />
         <input type="hidden" name="fechaPreferida" value={dia && hora ? hora : ""} />
 
@@ -250,6 +252,13 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
                       />
                     </div>
                   </div>
+                  <CampoTexto
+                    label="Email (opcional)"
+                    value={email}
+                    onChange={setEmail}
+                    placeholder="tucorreo@ejemplo.com"
+                    type="email"
+                  />
                 </div>
               </div>
             )}
