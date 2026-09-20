@@ -5,7 +5,7 @@ import { crearSolicitudAgendamiento } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { formatHora, toDatetimeLocalValue } from "@/lib/format";
+import { formatHora } from "@/lib/format";
 import type { Servicio } from "@prisma/client";
 
 function hoyISO() {
@@ -197,8 +197,8 @@ export function AgendarForm({ servicios }: { servicios: Servicio[] }) {
                 onClick={() => setFechaPreferida(h)}
                 className={`text-sm rounded-md border py-1.5 ${
                   fechaPreferida === h
-                    ? "bg-orange-600 text-white border-orange-600"
-                    : "border-slate-200 text-slate-700 hover:border-orange-400"
+                   ? "bg-accent text-paper border-accent"
+                    : "border-slate-200 text-slate-700 hover:border-accent"
                 }`}
               >
                 {formatHora(new Date(h))}
@@ -206,7 +206,7 @@ export function AgendarForm({ servicios }: { servicios: Servicio[] }) {
             ))}
           </div>
         )}
-        <input type="hidden" name="fechaPreferida" value={fechaPreferida ? toDatetimeLocalValue(new Date(fechaPreferida)) : ""} />
+        <input type="hidden" name="fechaPreferida" value={fechaPreferida} />
       </Field>
       <Field label="Comentario (opcional)" error={errors.comentario}>
         <Textarea

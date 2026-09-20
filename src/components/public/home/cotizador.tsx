@@ -108,7 +108,7 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
           <p className="mt-3 text-neutral-600">
             {state.pendiente
               ? "Esa hora se ocupó justo ahora. Recibimos tu solicitud y te contactaremos para coordinar otra."
-              : "Te enviamos la confirmación por WhatsApp. Te esperamos en Pedro de Valdivia 525."}
+                                      : `Te enviamos la confirmación por WhatsApp${state?.emailEnviado ? " y correo" : ""}. Te esperamos en Pedro de Valdivia 525.`}
           </p>
         </div>
       </section>
