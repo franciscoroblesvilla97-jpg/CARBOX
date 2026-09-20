@@ -217,11 +217,11 @@ export default async function InformeOrdenPublicoPage({
                 </tbody>
               </table>
 
-              {orden.checklist.danos.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-neutral-500 mb-1">
-                    Carrocería
-                  </p>
+              <div className="mb-4">
+                <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-neutral-500 mb-1">
+                  Carrocería
+                </p>
+                {orden.checklist.danos.length > 0 ? (
                   <ul className="text-[14px] text-neutral-600 list-disc list-inside">
                     {orden.checklist.danos.map((d) => (
                       <li key={d.id}>
@@ -231,8 +231,10 @@ export default async function InformeOrdenPublicoPage({
                       </li>
                     ))}
                   </ul>
-                </div>
-              )}
+                ) : (
+                  <p className="text-[14px] text-neutral-600">Sin daños registrados.</p>
+                )}
+              </div>
 
               {orden.checklist.observaciones && (
                 <div className="text-[14px]">

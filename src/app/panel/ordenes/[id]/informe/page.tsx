@@ -203,9 +203,9 @@ export default async function InformeOrdenPage({
               </tbody>
             </table>
 
-            {orden.checklist.danos.length > 0 && (
-              <div className="mb-4">
-                <p className="text-xs text-neutral-400 mb-1">Carrocería</p>
+            <div className="mb-4">
+              <p className="text-xs text-neutral-400 mb-1">Carrocería</p>
+              {orden.checklist.danos.length > 0 ? (
                 <ul className="text-sm text-neutral-600 list-disc list-inside">
                   {orden.checklist.danos.map((d) => (
                     <li key={d.id}>
@@ -215,8 +215,10 @@ export default async function InformeOrdenPage({
                     </li>
                   ))}
                 </ul>
-              </div>
-            )}
+              ) : (
+                <p className="text-sm text-neutral-600">Sin daños registrados.</p>
+              )}
+            </div>
 
             {orden.checklist.observaciones && (
               <div className="text-sm">
