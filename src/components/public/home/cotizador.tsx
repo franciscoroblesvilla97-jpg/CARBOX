@@ -108,8 +108,18 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
           <p className="mt-3 text-neutral-600">
             {state.pendiente
               ? "Esa hora se ocupó justo ahora. Recibimos tu solicitud y te contactaremos para coordinar otra."
-                                      : `Te enviamos la confirmación por WhatsApp${state?.emailEnviado ? " y correo" : ""}. Te esperamos en Pedro de Valdivia 525.`}
+              : state.emailEnviado
+                ? "Te enviamos la confirmación por correo. Te esperamos en Pedro de Valdivia 525."
+                : "Tu hora quedó confirmada. Te esperamos en Pedro de Valdivia 525."}
           </p>
+          <a
+            href={whatsappUrl(mensajeConfirmacion)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-block bg-accent hover:bg-accent-hover text-paper font-[family-name:var(--font-barlow-condensed)] font-semibold text-[16px] tracking-[0.06em] uppercase px-6 py-[14px] transition-colors"
+          >
+            Confirmar por WhatsApp
+          </a>
         </div>
       </section>
     );
