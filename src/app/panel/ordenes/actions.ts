@@ -252,16 +252,36 @@ export async function actualizarEstadoOrden(id: string, estado: EstadoOrden) {
       estado,
       fechaCierre: estado === "COMPLETADA" || estado === "CANCELADA" ? new Date() : null,
     },
-    include: { vehiculo: { include: { cliente: true } } },
+    include: {
+      vehiculo: { include: { cliente: true } },
+      servicios: { include: { servicio: true } },
+      productos: { include: { producto: true } },
+    },
   });
 
   if (estado === "COMPLETADA") {
+    const items = [
+      ...orden.servicios.map((l) => ({
+        nombre: l.servicio?.nombre ?? l.nombrePersonalizado ?? "Servicio",
+        cantidad: l.cantidad,
+        precio: Number(l.precioCobrado),
+      })),
+      ...orden.productos.map((l) => ({
+        nombre: l.producto?.nombre ?? l.nombrePersonalizado ?? "Repuesto",
+        cantidad: l.cantidad,
+        precio: Number(l.precioUnitario),
+      })),
+    ];
+    const total = items.reduce((acc, i) => acc + i.precio * i.cantidad, 0);
+
     await notificarOrdenCompletada({
       id: orden.id,
       numero: orden.numero,
       clienteNombre: orden.vehiculo.cliente.nombre,
       telefono: orden.vehiculo.cliente.telefono,
       email: orden.vehiculo.cliente.email,
+      items,
+      total,
     });
   }
 

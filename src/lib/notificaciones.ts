@@ -104,6 +104,17 @@ function listaServiciosHtml(servicios: { nombre: string; precio: number }[], tot
   return `<table style="width:100%; font-size:14px; border-collapse:collapse; margin:12px 0;">${filas}${filaTotal}</table>`;
 }
 
+function resumenOrdenHtml(items: { nombre: string; cantidad: number; precio: number }[], total: number) {
+  if (items.length === 0) return "";
+  const filas = items
+    .map(
+      (i) =>
+        `<tr><td style="padding:4px 0;">${i.nombre}${i.cantidad > 1 ? ` ×${i.cantidad}` : ""}</td><td style="padding:4px 0; text-align:right;">${formatCLP(i.precio * i.cantidad)}</td></tr>`
+    )
+    .join("");
+  return `<table style="width:100%; font-size:14px; border-collapse:collapse; margin:12px 0;">${filas}<tr><td style="padding:8px 0 0; border-top:1px solid #e2e8f0; font-weight:bold;">Total</td><td style="padding:8px 0 0; border-top:1px solid #e2e8f0; text-align:right; font-weight:bold;">${formatCLP(total)}</td></tr></table>`;
+}
+
 export async function notificarSolicitudConfirmada(solicitud: {
   nombreContacto: string;
   telefono: string;
@@ -232,13 +243,19 @@ export async function notificarOrdenCompletada(orden: {
   clienteNombre: string;
   telefono: string;
   email: string | null;
+  items?: { nombre: string; cantidad: number; precio: number }[];
+  total?: number;
 }) {
   const url = `${baseUrl}/informe-orden/${orden.id}`;
+  const items = orden.items ?? [];
+  const total = orden.total ?? 0;
 
   await Promise.all([
     enviarWhatsApp(
       orden.telefono,
-      `Hola ${orden.clienteNombre}, tu vehículo está listo — OT #${orden.numero}. Ver informe: ${url}`
+      `Hola ${orden.clienteNombre}, tu vehículo está listo — OT #${orden.numero}${
+        items.length > 0 ? ` (${formatCLP(total)})` : ""
+      }. Ver informe completo: ${url}`
     ),
     orden.email
       ? enviarEmail(
@@ -246,8 +263,9 @@ export async function notificarOrdenCompletada(orden: {
           `Tu vehículo está listo — OT #${orden.numero}`,
           envoltorioEmail(
             "¡Tu vehículo está listo!",
-            `<p>Hola ${orden.clienteNombre}, terminamos el trabajo de la orden #${orden.numero}.</p>
-             <p><a href="${url}" style="color:#c2410c;">Ver informe de servicio →</a></p>`
+            `<p>Hola ${orden.clienteNombre}, terminamos el trabajo de la orden #${orden.numero}. Esto fue lo realizado:</p>
+             ${resumenOrdenHtml(items, total)}
+             <p><a href="${url}" style="color:#c2410c;">Ver informe completo (con repuestos y observaciones) →</a></p>`
           )
         )
       : Promise.resolve(),
