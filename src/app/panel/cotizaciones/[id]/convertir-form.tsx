@@ -16,7 +16,7 @@ export function ConvertirForm({ cotizacionId, requierePatente }: { cotizacionId:
           <Input name="patente" placeholder="AB1234" required />
         </Field>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#a63327]">{error}</p>}
       <div className={requierePatente ? "mb-4" : ""}>
         <Button type="submit" disabled={pending}>
           {pending ? "Convirtiendo..." : "Convertir en orden de trabajo"}

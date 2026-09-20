@@ -16,21 +16,21 @@ export function SolicitudRow({ solicitud }: { solicitud: SolicitudConOrden }) {
     <div className="px-4 py-4">
       <div className="flex items-start justify-between">
         <div>
-          <p className="font-medium text-slate-900">
-            {solicitud.nombreContacto} <span className="text-slate-400 font-normal">· {solicitud.patente}</span>
+          <p className="font-medium text-ink">
+            {solicitud.nombreContacto} <span className="text-neutral-400 font-normal">· {solicitud.patente}</span>
           </p>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-neutral-500">
             {solicitud.telefono} {solicitud.email ? `· ${solicitud.email}` : ""}
           </p>
           {(solicitud.marca || solicitud.modelo || solicitud.anio) && (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-neutral-500">
               {solicitud.marca ?? ""} {solicitud.modelo ?? ""} {solicitud.anio ?? ""}
             </p>
           )}
-          <p className="text-sm text-slate-700 mt-1">
+          <p className="text-sm text-ink mt-1">
             {solicitud.servicioTexto} — preferencia {formatFecha(solicitud.fechaPreferida)}
           </p>
-          {solicitud.comentario && <p className="text-sm text-slate-500 mt-1">&ldquo;{solicitud.comentario}&rdquo;</p>}
+          {solicitud.comentario && <p className="text-sm text-neutral-500 mt-1">&ldquo;{solicitud.comentario}&rdquo;</p>}
         </div>
       </div>
 
@@ -54,7 +54,7 @@ export function SolicitudRow({ solicitud }: { solicitud: SolicitudConOrden }) {
           {solicitud.ordenGenerada ? (
             <Link
               href={`/panel/ordenes/${solicitud.ordenGenerada.id}`}
-              className="text-green-700 text-sm font-medium hover:underline"
+              className="text-accent-text text-sm font-medium hover:underline"
             >
               Ver orden de trabajo #{solicitud.ordenGenerada.numero} →
             </Link>

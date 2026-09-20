@@ -11,8 +11,8 @@ export default async function NuevoPuestoPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Nuevo puesto</h1>
-      <PuestoForm servicios={servicios} />
+      <h1 className="text-2xl font-bold text-ink mb-6">Nuevo puesto</h1>
+      <PuestoForm servicios={servicios.map((s) => ({ id: s.id, nombre: s.nombre }))} />
     </div>
   );
 }

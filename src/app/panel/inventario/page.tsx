@@ -38,7 +38,7 @@ export default async function InventarioPage({
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-slate-900">Inventario</h1>
+        <h1 className="text-2xl font-bold text-ink">Inventario</h1>
         {user.rol === "ADMIN" && (
           <div className="flex gap-2">
             <Link href="/panel/inventario/importar">
@@ -53,9 +53,9 @@ export default async function InventarioPage({
 
       <InventarioFiltros categoriaInicial={categoriaValida ?? ""} qInicial={busqueda ?? ""} />
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-paper border border-ink/12 overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+          <thead className="bg-surface text-left text-neutral-500">
             <tr>
               <th className="px-4 py-3">Producto</th>
               <th className="px-4 py-3">Categoría</th>
@@ -64,20 +64,20 @@ export default async function InventarioPage({
               <th className="px-4 py-3">Precio venta</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-ink/10">
             {productos.map((producto) => {
               const bajoStock = producto.stockActual <= producto.stockMinimo;
               return (
-                <tr key={producto.id} className="hover:bg-slate-50">
+                <tr key={producto.id} className="hover:bg-surface">
                   <td className="px-4 py-3">
-                    <Link href={`/panel/inventario/${producto.id}`} className="text-green-700 font-medium hover:underline">
+                    <Link href={`/panel/inventario/${producto.id}`} className="text-accent-text font-medium hover:underline">
                       {producto.nombre}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-slate-500">
+                  <td className="px-4 py-3 text-neutral-500">
                     {CATEGORIA_LABEL[producto.categoria as CategoriaProducto]}
                   </td>
-                  <td className="px-4 py-3 text-slate-500">{producto.sku ?? "—"}</td>
+                  <td className="px-4 py-3 text-neutral-500">{producto.sku ?? "—"}</td>
                   <td className="px-4 py-3">
                     {producto.stockActual} {producto.unidad}
                     {bajoStock && (
@@ -92,7 +92,7 @@ export default async function InventarioPage({
             })}
             {productos.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={5} className="px-4 py-6 text-center text-neutral-400">
                   Aún no hay productos registrados.
                 </td>
               </tr>

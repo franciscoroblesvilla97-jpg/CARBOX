@@ -30,7 +30,7 @@ export default async function CotizacionesPage({
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-slate-900">Cotizaciones</h1>
+        <h1 className="text-2xl font-bold text-ink">Cotizaciones</h1>
         <Link href="/panel/cotizaciones/nueva">
           <Button>Nueva cotización</Button>
         </Link>
@@ -48,9 +48,9 @@ export default async function CotizacionesPage({
         ))}
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-paper border border-ink/12 overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+          <thead className="bg-surface text-left text-neutral-500">
             <tr>
               <th className="px-4 py-3">N°</th>
               <th className="px-4 py-3">Cliente</th>
@@ -59,21 +59,21 @@ export default async function CotizacionesPage({
               <th className="px-4 py-3 text-right">Total</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-ink/10">
             {cotizaciones.map((c) => {
               const total =
                 c.servicios.reduce((a, l) => a + Number(l.precioCobrado) * l.cantidad, 0) +
                 c.productos.reduce((a, l) => a + Number(l.precioUnitario) * l.cantidad, 0);
               return (
-                <tr key={c.id} className="hover:bg-slate-50">
+                <tr key={c.id} className="hover:bg-surface">
                   <td className="px-4 py-3">
-                    <Link href={`/panel/cotizaciones/${c.id}`} className="text-green-700 font-medium hover:underline">
+                    <Link href={`/panel/cotizaciones/${c.id}`} className="text-accent-text font-medium hover:underline">
                       #{c.numero}
                     </Link>
-                    {c.ordenGenerada && <span className="ml-2 text-xs text-slate-400">→ OT #{c.ordenGenerada.numero}</span>}
+                    {c.ordenGenerada && <span className="ml-2 text-xs text-neutral-400">→ OT #{c.ordenGenerada.numero}</span>}
                   </td>
                   <td className="px-4 py-3">{c.nombreCliente}</td>
-                  <td className="px-4 py-3 text-slate-500">
+                  <td className="px-4 py-3 text-neutral-500">
                     {c.patente ?? "—"}
                     {(c.marca || c.modelo) && (
                       <span className="block text-xs">
@@ -81,14 +81,14 @@ export default async function CotizacionesPage({
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-500">{formatFechaCorta(c.createdAt)}</td>
+                  <td className="px-4 py-3 text-neutral-500">{formatFechaCorta(c.createdAt)}</td>
                   <td className="px-4 py-3 text-right font-medium">{formatCLP(total)}</td>
                 </tr>
               );
             })}
             {cotizaciones.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={5} className="px-4 py-6 text-center text-neutral-400">
                   No hay cotizaciones en este estado.
                 </td>
               </tr>

@@ -12,8 +12,8 @@ const ALTO_MIN_BLOQUE = 24;
 const estadoClases: Record<EstadoOrden, string> = {
   PENDIENTE: "bg-yellow-100 text-yellow-800 border-yellow-300",
   EN_PROGRESO: "bg-blue-100 text-blue-800 border-blue-300",
-  COMPLETADA: "bg-green-100 text-green-800 border-green-300",
-  CANCELADA: "bg-red-100 text-red-800 border-red-300",
+  COMPLETADA: "bg-accent-tint text-accent-text border-accent/40",
+  CANCELADA: "bg-[#faeceb] text-[#a63327] border-[#a63327]/30",
 };
 
 type OrdenConDatos = {
@@ -36,22 +36,22 @@ export function AgendaCalendario({ ordenes, puestos }: { ordenes: OrdenConDatos[
   const horas = Array.from({ length: HORA_FIN - HORA_INICIO }, (_, i) => HORA_INICIO + i);
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+    <div className="bg-paper border border-ink/12 overflow-hidden mb-8">
       <div className="flex">
-        <div className="w-12 shrink-0 border-r border-slate-100" />
+        <div className="w-12 shrink-0 border-r border-ink/10" />
         {columnas.map((col) => (
           <div
             key={col.id ?? "sin-asignar"}
-            className="flex-1 min-w-0 text-center text-xs font-medium text-slate-700 py-2 border-b border-l border-slate-100 bg-slate-50"
+            className="flex-1 min-w-0 text-center text-xs font-medium text-ink py-2 border-b border-l border-ink/10 bg-surface"
           >
             {col.nombre}
           </div>
         ))}
       </div>
       <div className="flex">
-        <div className="w-12 shrink-0 relative border-r border-slate-100" style={{ height: ALTO_TOTAL }}>
+        <div className="w-12 shrink-0 relative border-r border-ink/10" style={{ height: ALTO_TOTAL }}>
           {horas.map((h) => (
-            <div key={h} className="absolute left-0 right-0 text-[11px] text-slate-400 px-1" style={{ top: (h - HORA_INICIO) * 60 }}>
+            <div key={h} className="absolute left-0 right-0 text-[11px] text-neutral-400 px-1" style={{ top: (h - HORA_INICIO) * 60 }}>
               {String(h).padStart(2, "0")}:00
             </div>
           ))}
@@ -66,9 +66,9 @@ export function AgendaCalendario({ ordenes, puestos }: { ordenes: OrdenConDatos[
           );
 
           return (
-            <div key={col.id ?? "sin-asignar"} className="flex-1 min-w-0 relative border-l border-slate-100" style={{ height: ALTO_TOTAL }}>
+            <div key={col.id ?? "sin-asignar"} className="flex-1 min-w-0 relative border-l border-ink/10" style={{ height: ALTO_TOTAL }}>
               {horas.map((h) => (
-                <div key={h} className="absolute left-0 right-0 border-t border-slate-100" style={{ top: (h - HORA_INICIO) * 60 }} />
+                <div key={h} className="absolute left-0 right-0 border-t border-ink/10" style={{ top: (h - HORA_INICIO) * 60 }} />
               ))}
               {bloques.map((b) => {
                 const topSinClamp = (b.inicioMin - HORA_INICIO * 60) * PX_POR_MIN;
@@ -94,7 +94,7 @@ export function AgendaCalendario({ ordenes, puestos }: { ordenes: OrdenConDatos[
         })}
       </div>
       {ordenes.length === 0 && (
-        <p className="px-4 py-6 text-center text-slate-400 text-sm">No hay órdenes programadas para hoy.</p>
+        <p className="px-4 py-6 text-center text-neutral-400 text-sm">No hay órdenes programadas para hoy.</p>
       )}
     </div>
   );

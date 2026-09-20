@@ -14,8 +14,8 @@ export default async function ImportarInventarioPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-2">Importar desde foto</h1>
-      <p className="text-slate-500 mb-6">
+      <h1 className="text-2xl font-bold text-ink mb-2">Importar desde foto</h1>
+      <p className="text-neutral-500 mb-6">
         Toma o sube una foto de la guía de despacho o factura. La IA lee los productos y los deja listos para
         revisar antes de guardarlos.
       </p>

@@ -5,9 +5,9 @@ import { zonaDesdeCoordenadas, type TIPOS_DANO } from "@/lib/validations/checkli
 export type Dano = { tipo: (typeof TIPOS_DANO)[number]; x: number; y: number; nota?: string };
 
 const COLOR_TIPO: Record<Dano["tipo"], string> = {
-  GOLPE: "#b91c1c", // red-700
+  GOLPE: "#b91c1c",
   RAYON: "#a16207", // yellow-700
-  OTRO: "#334155", // slate-700
+  OTRO: "#334155",
 };
 
 const INICIAL_TIPO: Record<Dano["tipo"], string> = { GOLPE: "G", RAYON: "R", OTRO: "O" };
@@ -47,8 +47,8 @@ export function MapaCarroceria({
               onClick={() => onTipoActivoChange(tipo)}
               className={`px-3 py-1.5 text-xs font-semibold rounded border ${
                 tipoActivo === tipo
-                  ? "text-white border-transparent"
-                  : "text-slate-600 border-slate-300 bg-white"
+                  ? "text-paper border-transparent"
+                  : "text-neutral-600 border-ink/24 bg-paper"
               }`}
               style={tipoActivo === tipo ? { backgroundColor: COLOR_TIPO[tipo] } : undefined}
             >
@@ -58,7 +58,7 @@ export function MapaCarroceria({
         </div>
       )}
 
-      <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 mb-1">
+      <div className="flex items-center justify-center gap-2 text-[11px] text-neutral-400 mb-1">
         <span>Izquierdo</span>
         <span>Frente ↑</span>
         <span>Derecho</span>
@@ -66,10 +66,10 @@ export function MapaCarroceria({
 
       <div
         onClick={handleClick}
-        className="relative mx-auto w-full max-w-[220px] aspect-[1/2] border border-slate-300 rounded"
+        className="relative mx-auto w-full max-w-[220px] aspect-[1/2] border border-ink/24 rounded"
         style={{ cursor: soloLectura ? "default" : "crosshair" }}
       >
-        <svg viewBox="0 0 200 400" className="absolute inset-0 w-full h-full text-slate-400" fill="none">
+        <svg viewBox="0 0 200 400" className="absolute inset-0 w-full h-full text-neutral-400" fill="none">
           {/* Silueta cenital del vehículo: capó, parabrisas, techo, luneta y parachoques trasero. */}
           <path
             d="M100 6
@@ -112,7 +112,7 @@ export function MapaCarroceria({
               e.stopPropagation();
               if (!soloLectura) onEliminar(i);
             }}
-            className="absolute flex items-center justify-center w-[22px] h-[22px] rounded-full bg-white text-[11px] font-bold"
+            className="absolute flex items-center justify-center w-[22px] h-[22px] bg-paper text-[11px] font-bold"
             style={{
               left: `${d.x}%`,
               top: `${d.y}%`,
@@ -126,10 +126,10 @@ export function MapaCarroceria({
         ))}
       </div>
 
-      <p className="text-center text-[11px] text-slate-400 mt-1">Trasera ↓</p>
+      <p className="text-center text-[11px] text-neutral-400 mt-1">Trasera ↓</p>
 
       {danos.length > 0 && (
-        <ol className="mt-3 space-y-1 text-sm text-slate-600 list-decimal list-inside">
+        <ol className="mt-3 space-y-1 text-sm text-neutral-600 list-decimal list-inside">
           {danos.map((d, i) => (
             <li key={i}>
               {d.tipo === "GOLPE" ? "Golpe" : d.tipo === "RAYON" ? "Rayón" : "Otro"} en{" "}

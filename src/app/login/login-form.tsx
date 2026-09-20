@@ -17,7 +17,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
       <Field label="Contraseña">
         <Input type="password" name="password" required />
       </Field>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#a63327]">{error}</p>}
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Ingresando..." : "Ingresar"}
       </Button>

@@ -8,6 +8,8 @@ import { EstadoActions } from "./estado-actions";
 import { AsignacionForm } from "./asignacion-form";
 import { AgregarServicioForm } from "./agregar-servicio-form";
 import { AgregarMaterialForm } from "./agregar-material-form";
+import { AgregarMaterialTecnicoForm } from "./agregar-material-tecnico-form";
+import { FijarPrecioForm } from "./fijar-precio-form";
 import { ChecklistForm } from "./checklist-form";
 import { ArchivosOrden } from "./archivos-orden";
 
@@ -78,28 +80,28 @@ export default async function OrdenDetallePage({
     <div className="max-w-3xl">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <p className="text-sm text-slate-500">
-            <Link href={`/panel/vehiculos/${orden.vehiculoId}`} className="text-green-700 hover:underline">
+          <p className="text-sm text-neutral-500">
+            <Link href={`/panel/vehiculos/${orden.vehiculoId}`} className="text-accent-text hover:underline">
               {orden.vehiculo.patente}
             </Link>{" "}
             — {orden.vehiculo.marca ?? ""} {orden.vehiculo.modelo ?? ""} · {orden.vehiculo.cliente.nombre}
           </p>
-          <h1 className="text-2xl font-bold text-slate-900">Orden de trabajo #{orden.numero}</h1>
+          <h1 className="text-2xl font-bold text-ink">Orden de trabajo #{orden.numero}</h1>
           <div className="mt-1 flex items-center gap-2">
             <Badge color={estadoColor[orden.estado]}>{orden.estado}</Badge>
-            <span className="text-xs text-slate-400">Programada {formatFecha(orden.fechaProgramada)}</span>
+            <span className="text-xs text-neutral-400">Programada {formatFecha(orden.fechaProgramada)}</span>
           </div>
-          <Link href={`/panel/ordenes/${orden.id}/informe`} className="text-sm text-green-700 hover:underline">
+          <Link href={`/panel/ordenes/${orden.id}/informe`} className="text-sm text-accent-text hover:underline">
             Ver informe para el cliente →
           </Link>
         </div>
         <EstadoActions ordenId={orden.id} estado={orden.estado} esAdmin={user.rol === "ADMIN"} />
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 mb-4">
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Asignación</h2>
+      <div className="bg-paper border border-ink/12 p-4 mb-4">
+        <h2 className="text-sm font-semibold text-ink mb-3">Asignación</h2>
         {esTecnico ? (
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-neutral-600">
             Asignada a ti {orden.puesto && <>· Puesto: {orden.puesto.nombre}</>}
           </p>
         ) : (
@@ -113,17 +115,17 @@ export default async function OrdenDetallePage({
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 mb-4">
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Servicios</h2>
+      <div className="bg-paper border border-ink/12 p-4 mb-4">
+        <h2 className="text-sm font-semibold text-ink mb-3">Servicios</h2>
         <table className="w-full text-sm mb-4">
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-ink/10">
             {orden.servicios.map((linea) => (
               <tr key={linea.id}>
                 <td className="py-2">
                   {linea.servicio?.nombre ?? linea.nombrePersonalizado}
                   {!linea.servicioId && <Badge color="blue">Personalizado</Badge>}
                 </td>
-                <td className="py-2 text-right text-slate-500">x{linea.cantidad}</td>
+                <td className="py-2 text-right text-neutral-500">x{linea.cantidad}</td>
                 {!esTecnico && (
                   <td className="py-2 text-right font-medium">
                     {formatCLP(Number(linea.precioCobrado) * linea.cantidad)}
@@ -133,61 +135,90 @@ export default async function OrdenDetallePage({
             ))}
             {orden.servicios.length === 0 && (
               <tr>
-                <td className="py-2 text-slate-400">Sin servicios en esta orden.</td>
+                <td className="py-2 text-neutral-400">Sin servicios en esta orden.</td>
               </tr>
             )}
           </tbody>
         </table>
-        {ordenEditable && !esTecnico && <AgregarServicioForm ordenId={orden.id} servicios={servicios} />}
+        {ordenEditable && !esTecnico && (
+          <AgregarServicioForm
+            ordenId={orden.id}
+            servicios={servicios.map((s) => ({ ...s, precioBase: Number(s.precioBase) }))}
+          />
+        )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 mb-4">
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Productos / materiales usados</h2>
+      <div className="bg-paper border border-ink/12 p-4 mb-4">
+        <h2 className="text-sm font-semibold text-ink mb-3">Productos / materiales usados</h2>
         <table className="w-full text-sm mb-4">
           <thead>
-            <tr className="text-left text-xs text-slate-400">
+            <tr className="text-left text-xs text-neutral-400">
               <th className="font-normal pb-1">Producto</th>
               <th className="font-normal pb-1 text-right">Cant.</th>
               {user.rol === "ADMIN" && <th className="font-normal pb-1 text-right">Costo</th>}
               {!esTecnico && <th className="font-normal pb-1 text-right">Cobrado</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-ink/10">
             {orden.productos.map((linea) => (
               <tr key={linea.id}>
                 <td className="py-2">
                   {linea.producto?.nombre ?? linea.nombrePersonalizado}
-                  {!linea.productoId && <Badge color="blue">Externo</Badge>}
+                  {!linea.productoId && !linea.pendienteRevision && <Badge color="blue">Externo</Badge>}
                 </td>
-                <td className="py-2 text-right text-slate-500">x{linea.cantidad}</td>
+                <td className="py-2 text-right text-neutral-500">x{linea.cantidad}</td>
                 {user.rol === "ADMIN" && (
-                  <td className="py-2 text-right text-slate-500">
-                    {formatCLP(Number(linea.costoUnitario) * linea.cantidad)}
+                  <td className="py-2 text-right text-neutral-500">
+                    {linea.pendienteRevision ? "" : formatCLP(Number(linea.costoUnitario) * linea.cantidad)}
                   </td>
                 )}
                 {!esTecnico && (
                   <td className="py-2 text-right font-medium">
-                    {formatCLP(Number(linea.precioUnitario) * linea.cantidad)}
+                    {linea.pendienteRevision ? (
+                      <div className="flex items-center justify-end gap-2">
+                        <Badge color="yellow">Pendiente de precio</Badge>
+                        {(user.rol === "ADMIN" || user.rol === "EMPLEADO") && (
+                          <FijarPrecioForm
+                            ordenId={orden.id}
+                            lineaId={linea.id}
+                            productos={productos.map((p) => ({ id: p.id, nombre: p.nombre }))}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      formatCLP(Number(linea.precioUnitario) * linea.cantidad)
+                    )}
                   </td>
                 )}
               </tr>
             ))}
             {orden.productos.length === 0 && (
               <tr>
-                <td colSpan={user.rol === "ADMIN" ? 4 : esTecnico ? 2 : 3} className="py-2 text-slate-400">
+                <td colSpan={user.rol === "ADMIN" ? 4 : esTecnico ? 2 : 3} className="py-2 text-neutral-400">
                   Sin productos en esta orden.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-        {ordenEditable && !esTecnico && <AgregarMaterialForm ordenId={orden.id} productos={productos} />}
+        {ordenEditable && esTecnico && (
+          <AgregarMaterialTecnicoForm
+            ordenId={orden.id}
+            productos={productos.map((p) => ({ id: p.id, nombre: p.nombre, stockActual: p.stockActual }))}
+          />
+        )}
+        {ordenEditable && !esTecnico && (
+          <AgregarMaterialForm
+            ordenId={orden.id}
+            productos={productos.map((p) => ({ ...p, precioVenta: Number(p.precioVenta), costoUnitario: Number(p.costoUnitario) }))}
+          />
+        )}
       </div>
 
       {orden.observaciones && (
-        <div className="bg-white rounded-lg shadow p-4 mb-4">
-          <h2 className="text-sm font-semibold text-slate-700 mb-1">Observaciones</h2>
-          <p className="text-sm text-slate-600">{orden.observaciones}</p>
+        <div className="bg-paper border border-ink/12 p-4 mb-4">
+          <h2 className="text-sm font-semibold text-ink mb-1">Observaciones</h2>
+          <p className="text-sm text-neutral-600">{orden.observaciones}</p>
         </div>
       )}
 
@@ -195,18 +226,18 @@ export default async function OrdenDetallePage({
         <div className="flex flex-col items-end gap-1 mb-6">
           {user.rol === "ADMIN" && (
             <>
-              <p className="text-sm text-slate-500">Costo materiales: {formatCLP(costoMateriales)}</p>
-              <p className="text-sm text-slate-500">
-                Margen: <span className={margen >= 0 ? "text-green-700" : "text-red-700"}>{formatCLP(margen)}</span>
+              <p className="text-sm text-neutral-500">Costo materiales: {formatCLP(costoMateriales)}</p>
+              <p className="text-sm text-neutral-500">
+                Margen: <span className={margen >= 0 ? "text-accent-text" : "text-[#a63327]"}>{formatCLP(margen)}</span>
               </p>
             </>
           )}
-          <p className="text-lg font-bold text-slate-900">Total: {formatCLP(total)}</p>
+          <p className="text-lg font-bold text-ink">Total: {formatCLP(total)}</p>
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow p-4 mb-4">
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Checklist de ingreso</h2>
+      <div className="bg-paper border border-ink/12 p-4 mb-4">
+        <h2 className="text-sm font-semibold text-ink mb-3">Checklist de ingreso</h2>
         <ChecklistForm
           ordenId={orden.id}
           checklist={
@@ -233,8 +264,8 @@ export default async function OrdenDetallePage({
         />
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 mb-4">
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">Archivos adjuntos</h2>
+      <div className="bg-paper border border-ink/12 p-4 mb-4">
+        <h2 className="text-sm font-semibold text-ink mb-3">Archivos adjuntos</h2>
         <ArchivosOrden ordenId={orden.id} archivos={orden.archivos} />
       </div>
     </div>

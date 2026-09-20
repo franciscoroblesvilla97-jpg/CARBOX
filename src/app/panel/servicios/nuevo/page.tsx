@@ -8,7 +8,7 @@ export default async function NuevoServicioPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Nuevo servicio</h1>
+      <h1 className="text-2xl font-bold text-ink mb-6">Nuevo servicio</h1>
       <ServicioForm />
     </div>
   );

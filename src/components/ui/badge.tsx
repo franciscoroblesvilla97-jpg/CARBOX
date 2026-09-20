@@ -1,9 +1,9 @@
 const colorClasses = {
-  gray: "bg-slate-100 text-slate-700",
-  green: "bg-green-100 text-green-700",
-  yellow: "bg-yellow-100 text-yellow-800",
-  red: "bg-red-100 text-red-700",
-  blue: "bg-blue-100 text-blue-700",
+  gray: "bg-neutral-100 text-neutral-700",
+  green: "bg-[#eaf4ee] text-[#3f7d55]",
+  yellow: "bg-[#f8f1e0] text-[#b8860b]",
+  red: "bg-[#faeceb] text-[#a63327]",
+  blue: "bg-accent-tint text-accent-text",
 } as const;
 
 export function Badge({
@@ -14,7 +14,9 @@ export function Badge({
   color?: keyof typeof colorClasses;
 }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${colorClasses[color]}`}>
+    <span
+      className={`inline-flex items-center px-[6px] py-[2px] font-[family-name:var(--font-barlow-condensed)] text-[11px] font-semibold uppercase tracking-[0.04em] ${colorClasses[color]}`}
+    >
       {children}
     </span>
   );

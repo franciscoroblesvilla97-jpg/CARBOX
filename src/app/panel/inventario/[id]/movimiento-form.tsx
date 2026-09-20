@@ -11,7 +11,7 @@ export function MovimientoForm({ productoId }: { productoId: string }) {
   const [tipo, setTipo] = useState("ENTRADA");
 
   return (
-    <form action={formAction} className="grid grid-cols-4 gap-3 bg-slate-50 rounded-md p-4 items-end">
+    <form action={formAction} className="grid grid-cols-4 gap-3 bg-surface p-4 items-end">
       <Field label="Tipo">
         <Select name="tipo" defaultValue="ENTRADA" onChange={(e) => setTipo(e.target.value)}>
           <option value="ENTRADA">Entrada</option>
@@ -30,7 +30,7 @@ export function MovimientoForm({ productoId }: { productoId: string }) {
       <Field label="Motivo (opcional)">
         <Input name="motivo" placeholder="Compra proveedor X" />
       </Field>
-      {error && <p className="col-span-4 text-sm text-red-600">{error}</p>}
+      {error && <p className="col-span-4 text-sm text-[#a63327]">{error}</p>}
       <div className="col-span-4">
         <Button type="submit" disabled={pending}>
           {pending ? "Registrando..." : "Registrar movimiento"}

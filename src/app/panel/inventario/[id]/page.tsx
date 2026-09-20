@@ -21,17 +21,34 @@ export default async function ProductoDetallePage({
 
   if (!producto) notFound();
 
+  const productoPlano = {
+    id: producto.id,
+    nombre: producto.nombre,
+    sku: producto.sku,
+    categoria: producto.categoria,
+    unidad: producto.unidad,
+    precioVenta: Number(producto.precioVenta),
+    costoUnitario: Number(producto.costoUnitario),
+    stockActual: producto.stockActual,
+    stockMinimo: producto.stockMinimo,
+    marca: producto.marca,
+    medida: producto.medida,
+    indice: producto.indice,
+    imagenUrl: producto.imagenUrl,
+    createdAt: producto.createdAt,
+  };
+
   return (
     <div className="space-y-8">
       <div>
         <div className="flex items-center gap-3 mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">{producto.nombre}</h1>
+          <h1 className="text-2xl font-bold text-ink">{producto.nombre}</h1>
           {producto.stockActual <= producto.stockMinimo && <Badge color="red">Bajo stock</Badge>}
         </div>
         {user.rol === "ADMIN" ? (
-          <ProductoForm producto={producto} />
+          <ProductoForm producto={productoPlano} />
         ) : (
-          <div className="max-w-md text-sm text-slate-600 space-y-1">
+          <div className="max-w-md text-sm text-neutral-600 space-y-1">
             <p>SKU: {producto.sku ?? "—"}</p>
             <p>
               Stock actual: {producto.stockActual} {producto.unidad}
@@ -42,23 +59,23 @@ export default async function ProductoDetallePage({
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-3">Registrar movimiento</h2>
+        <h2 className="text-lg font-semibold text-ink mb-3">Registrar movimiento</h2>
         <MovimientoForm productoId={producto.id} />
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-3">Movimientos recientes</h2>
-        <div className="bg-white rounded-lg shadow divide-y divide-slate-100">
+        <h2 className="text-lg font-semibold text-ink mb-3">Movimientos recientes</h2>
+        <div className="bg-paper border border-ink/12 divide-y divide-ink/10">
           {producto.movimientos.map((m) => (
             <div key={m.id} className="flex items-center justify-between px-4 py-3 text-sm">
               <div>
                 <span className="font-medium">{m.tipo}</span>{" "}
-                <span className="text-slate-500">{m.motivo ? `— ${m.motivo}` : ""}</span>
+                <span className="text-neutral-500">{m.motivo ? `— ${m.motivo}` : ""}</span>
                 {user.rol === "ADMIN" && m.costoUnitario !== null && (
-                  <span className="text-slate-400"> · costo {formatCLP(m.costoUnitario.toString())}/u</span>
+                  <span className="text-neutral-400"> · costo {formatCLP(m.costoUnitario.toString())}/u</span>
                 )}
               </div>
-              <div className="text-right text-slate-500">
+              <div className="text-right text-neutral-500">
                 <p>{m.cantidad} · {m.usuario.nombre}</p>
                 <p className="text-xs">{formatFecha(m.createdAt)}</p>
                 {m.fotosUrl && (
@@ -69,7 +86,7 @@ export default async function ProductoDetallePage({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-green-700 hover:underline"
+                        className="text-accent-text hover:underline"
                       >
                         {i > 0 && " · "}Ver comprobante{m.fotosUrl!.split(",").length > 1 ? ` ${i + 1}` : ""}
                       </a>
@@ -80,7 +97,7 @@ export default async function ProductoDetallePage({
             </div>
           ))}
           {producto.movimientos.length === 0 && (
-            <p className="px-4 py-6 text-center text-slate-400 text-sm">Sin movimientos registrados.</p>
+            <p className="px-4 py-6 text-center text-neutral-400 text-sm">Sin movimientos registrados.</p>
           )}
         </div>
       </div>

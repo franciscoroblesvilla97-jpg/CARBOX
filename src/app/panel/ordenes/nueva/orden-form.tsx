@@ -9,6 +9,8 @@ import type { Vehiculo, Cliente, Servicio, Producto, Trabajador } from "@prisma/
 
 type VehiculoConCliente = Vehiculo & { cliente: Cliente };
 type PuestoConServicioIds = { id: string; nombre: string; servicioIds: string[] };
+type ServicioPlano = Omit<Servicio, "precioBase"> & { precioBase: number };
+type ProductoPlano = Omit<Producto, "precioVenta" | "costoUnitario"> & { precioVenta: number; costoUnitario: number };
 
 export function OrdenForm({
   vehiculos,
@@ -18,8 +20,8 @@ export function OrdenForm({
   puestos,
 }: {
   vehiculos: VehiculoConCliente[];
-  servicios: Servicio[];
-  productos: Producto[];
+  servicios: ServicioPlano[];
+  productos: ProductoPlano[];
   trabajadores: Trabajador[];
   puestos: PuestoConServicioIds[];
 }) {
@@ -60,14 +62,14 @@ export function OrdenForm({
       </Field>
 
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-2">Servicios</h2>
-        <div className="bg-white rounded-md border border-slate-200 divide-y divide-slate-100">
+        <h2 className="text-sm font-semibold text-ink mb-2">Servicios</h2>
+        <div className="bg-paper border border-ink/16 divide-y divide-ink/10">
           {servicios.map((servicio) => (
             <div key={servicio.id} className="flex items-center justify-between px-3 py-2">
               <div>
                 <input type="hidden" name="servicioId" value={servicio.id} />
-                <p className="text-sm font-medium text-slate-800">{servicio.nombre}</p>
-                <p className="text-xs text-slate-500">{formatCLP(servicio.precioBase.toString())}</p>
+                <p className="text-sm font-medium text-ink">{servicio.nombre}</p>
+                <p className="text-xs text-neutral-500">{formatCLP(servicio.precioBase.toString())}</p>
               </div>
               <input
                 type="number"
@@ -77,23 +79,23 @@ export function OrdenForm({
                 onChange={(e) =>
                   setCantidades((prev) => ({ ...prev, [servicio.id]: Number(e.target.value) || 0 }))
                 }
-                className="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                className="w-20 border border-ink/24 px-2 py-1 text-sm"
               />
             </div>
           ))}
-          {servicios.length === 0 && <p className="px-3 py-4 text-sm text-slate-400">No hay servicios activos.</p>}
+          {servicios.length === 0 && <p className="px-3 py-4 text-sm text-neutral-400">No hay servicios activos.</p>}
         </div>
       </div>
 
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-2">Productos / materiales</h2>
-        <div className="bg-white rounded-md border border-slate-200 divide-y divide-slate-100">
+        <h2 className="text-sm font-semibold text-ink mb-2">Productos / materiales</h2>
+        <div className="bg-paper border border-ink/16 divide-y divide-ink/10">
           {productos.map((producto) => (
             <div key={producto.id} className="flex items-center justify-between px-3 py-2">
               <div>
                 <input type="hidden" name="productoId" value={producto.id} />
-                <p className="text-sm font-medium text-slate-800">{producto.nombre}</p>
-                <p className="text-xs text-slate-500">
+                <p className="text-sm font-medium text-ink">{producto.nombre}</p>
+                <p className="text-xs text-neutral-500">
                   Stock: {producto.stockActual} {producto.unidad} · {formatCLP(producto.precioVenta.toString())}
                 </p>
               </div>
@@ -102,18 +104,18 @@ export function OrdenForm({
                 name="productoCantidad"
                 min={0}
                 defaultValue={0}
-                className="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                className="w-20 border border-ink/24 px-2 py-1 text-sm"
               />
             </div>
           ))}
-          {productos.length === 0 && <p className="px-3 py-4 text-sm text-slate-400">No hay productos registrados.</p>}
+          {productos.length === 0 && <p className="px-3 py-4 text-sm text-neutral-400">No hay productos registrados.</p>}
         </div>
       </div>
 
       <Field label="Fecha y hora programada">
         <Input name="fechaProgramada" type="datetime-local" defaultValue={fechaProgramada} required />
         {duracionEstimada > 0 && (
-          <p className="mt-1 text-xs text-slate-400">Duración estimada: {duracionEstimada} min.</p>
+          <p className="mt-1 text-xs text-neutral-400">Duración estimada: {duracionEstimada} min.</p>
         )}
       </Field>
 
@@ -138,10 +140,10 @@ export function OrdenForm({
             ))}
           </Select>
           {servicioIdsSeleccionados.length > 0 && puestosDisponibles.length === 0 && (
-            <p className="mt-1 text-sm text-red-600">Ningún puesto activo puede realizar todos los servicios elegidos.</p>
+            <p className="mt-1 text-sm text-[#a63327]">Ningún puesto activo puede realizar todos los servicios elegidos.</p>
           )}
           {servicioIdsSeleccionados.length > 0 && puestosDisponibles.length > 0 && (
-            <p className="mt-1 text-xs text-slate-400">Solo se muestran los puestos que pueden hacer todos los servicios seleccionados.</p>
+            <p className="mt-1 text-xs text-neutral-400">Solo se muestran los puestos que pueden hacer todos los servicios seleccionados.</p>
           )}
         </Field>
       </div>
@@ -150,7 +152,7 @@ export function OrdenForm({
         <Textarea name="observaciones" rows={3} />
       </Field>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#a63327]">{error}</p>}
       <Button type="submit" disabled={pending}>
         {pending ? "Creando orden..." : "Crear orden de trabajo"}
       </Button>

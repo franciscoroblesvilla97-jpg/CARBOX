@@ -46,7 +46,7 @@ export function AsignacionForm({
           ))}
         </Select>
       </Field>
-      {error && <p className="col-span-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="col-span-2 text-sm text-[#a63327]">{error}</p>}
       <div className="col-span-2">
         <Button type="submit" disabled={pending} variant="ghost">
           {pending ? "Guardando..." : "Guardar asignación"}

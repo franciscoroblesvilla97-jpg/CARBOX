@@ -6,7 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/input";
 import type { Producto } from "@prisma/client";
 
-export function AgregarMaterialForm({ cotizacionId, productos }: { cotizacionId: string; productos: Producto[] }) {
+type ProductoPlano = Omit<Producto, "precioVenta" | "costoUnitario"> & { precioVenta: number; costoUnitario: number };
+
+export function AgregarMaterialForm({
+  cotizacionId,
+  productos,
+}: {
+  cotizacionId: string;
+  productos: ProductoPlano[];
+}) {
   const action = agregarMaterialACotizacion.bind(null, cotizacionId);
   const [error, formAction, pending] = useActionState(action, undefined);
   const [modo, setModo] = useState<"inventario" | "externo">("inventario");
@@ -56,7 +64,7 @@ export function AgregarMaterialForm({ cotizacionId, productos }: { cotizacionId:
         <Input name="cantidad" type="number" min={1} defaultValue={1} required />
       </Field>
 
-      {error && <p className="col-span-4 text-sm text-red-600">{error}</p>}
+      {error && <p className="col-span-4 text-sm text-[#a63327]">{error}</p>}
       <div className="col-span-4">
         <Button type="submit" variant="ghost" disabled={pending}>
           {pending ? "Agregando..." : "Agregar material"}

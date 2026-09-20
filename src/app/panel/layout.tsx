@@ -5,7 +5,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const user = await requireSession();
 
   return (
-    <div className="flex min-h-screen bg-slate-50 print:block print:bg-white">
+    <div className="flex min-h-screen bg-paper print:block print:bg-white font-[family-name:var(--font-barlow)]">
       <Sidebar rol={user.rol} nombre={user.nombre} />
       <main className="flex-1 p-8 print:p-0">{children}</main>
     </div>

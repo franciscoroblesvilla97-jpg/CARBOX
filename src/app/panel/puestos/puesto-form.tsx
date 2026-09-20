@@ -4,11 +4,18 @@ import { useActionState } from "react";
 import { crearPuesto, actualizarPuesto } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
-import type { Puesto, Servicio } from "@prisma/client";
+import type { Puesto } from "@prisma/client";
 
-type PuestoConServicios = Puesto & { servicios: Servicio[] };
+type ServicioResumen = { id: string; nombre: string };
+type PuestoConServicios = Puesto & { servicios: ServicioResumen[] };
 
-export function PuestoForm({ puesto, servicios }: { puesto?: PuestoConServicios; servicios: Servicio[] }) {
+export function PuestoForm({
+  puesto,
+  servicios,
+}: {
+  puesto?: PuestoConServicios;
+  servicios: ServicioResumen[];
+}) {
   const action = puesto ? actualizarPuesto.bind(null, puesto.id) : crearPuesto;
   const [error, formAction, pending] = useActionState(action, undefined);
   const idsSeleccionados = new Set(puesto?.servicios.map((s) => s.id) ?? []);
@@ -20,8 +27,8 @@ export function PuestoForm({ puesto, servicios }: { puesto?: PuestoConServicios;
       </Field>
 
       <div className="mb-4">
-        <p className="block text-sm font-medium text-slate-700 mb-1">Servicios que puede realizar</p>
-        <div className="bg-slate-50 rounded-md border border-slate-200 divide-y divide-slate-100">
+        <p className="block text-sm font-medium text-ink mb-1">Servicios que puede realizar</p>
+        <div className="bg-surface border border-ink/16 divide-y divide-ink/10">
           {servicios.map((servicio) => (
             <label key={servicio.id} className="flex items-center gap-2 px-3 py-2 text-sm">
               <input
@@ -36,12 +43,12 @@ export function PuestoForm({ puesto, servicios }: { puesto?: PuestoConServicios;
         </div>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-slate-700 mb-4">
+      <label className="flex items-center gap-2 text-sm text-ink mb-4">
         <input type="checkbox" name="activo" defaultChecked={puesto?.activo ?? true} />
         Puesto activo (disponible para asignar en órdenes)
       </label>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#a63327]">{error}</p>}
       <Button type="submit" disabled={pending}>
         {pending ? "Guardando..." : puesto ? "Guardar cambios" : "Crear puesto"}
       </Button>

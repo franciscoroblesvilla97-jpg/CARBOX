@@ -11,7 +11,7 @@ export function VehiculoEditForm({ vehiculo }: { vehiculo: Vehiculo }) {
   const [error, formAction, pending] = useActionState(action, undefined);
 
   return (
-    <form action={formAction} className="grid grid-cols-2 gap-3 bg-slate-50 rounded-md p-4">
+    <form action={formAction} className="grid grid-cols-2 gap-3 bg-surface p-4">
       <Field label="Patente">
         <Input name="patente" defaultValue={vehiculo.patente} required />
       </Field>
@@ -24,7 +24,7 @@ export function VehiculoEditForm({ vehiculo }: { vehiculo: Vehiculo }) {
       <Field label="Modelo (opcional)">
         <Input name="modelo" defaultValue={vehiculo.modelo ?? ""} />
       </Field>
-      {error && <p className="col-span-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="col-span-2 text-sm text-[#a63327]">{error}</p>}
       <div className="col-span-2">
         <Button type="submit" disabled={pending}>
           {pending ? "Guardando..." : "Guardar datos del vehículo"}

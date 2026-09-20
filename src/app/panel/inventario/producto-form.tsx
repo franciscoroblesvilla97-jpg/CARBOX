@@ -12,7 +12,12 @@ function margenDesdePrecios(costo: number, precioVenta: number) {
   return (((precioVenta - costo) / costo) * 100).toFixed(0);
 }
 
-export function ProductoForm({ producto }: { producto?: Producto }) {
+type ProductoPlano = Omit<Producto, "precioVenta" | "costoUnitario"> & {
+  precioVenta: number;
+  costoUnitario: number;
+};
+
+export function ProductoForm({ producto }: { producto?: ProductoPlano }) {
   const action = producto ? actualizarProducto.bind(null, producto.id) : crearProducto;
   const [error, formAction, pending] = useActionState(action, undefined);
 
@@ -54,7 +59,7 @@ export function ProductoForm({ producto }: { producto?: Producto }) {
           </Field>
           <Field label="Medida (opcional)">
             <Input name="medida" defaultValue={producto?.medida ?? ""} placeholder="Ej: 195/65 R15" />
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-neutral-400 mt-1">
               Formato exacto ancho/perfil R aro — así lo encuentra el buscador del sitio.
             </p>
           </Field>
@@ -96,7 +101,7 @@ export function ProductoForm({ producto }: { producto?: Producto }) {
           }}
           placeholder="Ej: 30"
         />
-        <p className="text-xs text-slate-400 mt-1">Calcula el precio de venta automáticamente a partir del costo.</p>
+        <p className="text-xs text-neutral-400 mt-1">Calcula el precio de venta automáticamente a partir del costo.</p>
       </Field>
       <Field label="Precio de venta (CLP)">
         <Input
@@ -115,7 +120,7 @@ export function ProductoForm({ producto }: { producto?: Producto }) {
       <Field label="Stock mínimo (alerta)">
         <Input name="stockMinimo" type="number" min={0} defaultValue={producto?.stockMinimo} required />
       </Field>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#a63327]">{error}</p>}
       <Button type="submit" disabled={pending}>
         {pending ? "Guardando..." : producto ? "Guardar cambios" : "Crear producto"}
       </Button>

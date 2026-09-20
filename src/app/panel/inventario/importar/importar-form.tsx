@@ -65,7 +65,7 @@ export function ImportarForm({ productos }: { productos: ProductoExistente[] }) 
         <Field label="Foto(s) de la guía o factura">
           <Input type="file" name="fotos" accept="image/*" capture="environment" multiple required />
         </Field>
-        {analisis && "error" in analisis && <p className="text-sm text-red-600">{analisis.error}</p>}
+        {analisis && "error" in analisis && <p className="text-sm text-[#a63327]">{analisis.error}</p>}
         <Button type="submit" disabled={analizando}>
           {analizando ? "Leyendo foto..." : "Analizar factura"}
         </Button>
@@ -78,12 +78,12 @@ export function ImportarForm({ productos }: { productos: ProductoExistente[] }) 
       <input type="hidden" name="lineas" value={JSON.stringify(filasListas)} />
       <input type="hidden" name="fotosUrl" value={fotosUrl.join(",")} />
 
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-neutral-500">
         Revisa y corrige antes de guardar. Los productos nuevos quedan con precio de venta en $0 — recuerda
         editarlo después.
       </p>
 
-      <div className="bg-white rounded-md border border-slate-200 divide-y divide-slate-100">
+      <div className="bg-paper border border-ink/16 divide-y divide-ink/10">
         {filasListas.map((fila, i) => (
           <div key={i} className="p-3 grid grid-cols-6 gap-2 items-end">
             <div className="col-span-2">
@@ -138,7 +138,7 @@ export function ImportarForm({ productos }: { productos: ProductoExistente[] }) 
         ))}
       </div>
 
-      {confirmError && <p className="text-sm text-red-600">{confirmError}</p>}
+      {confirmError && <p className="text-sm text-[#a63327]">{confirmError}</p>}
       <div className="flex gap-2">
         <Button
           type="button"

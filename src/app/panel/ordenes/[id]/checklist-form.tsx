@@ -136,11 +136,11 @@ export function ChecklistForm({
 
         <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <h3 className="text-sm font-semibold text-slate-700 mb-3">Presiones de neumáticos (psi)</h3>
+            <h3 className="text-sm font-semibold text-ink mb-3">Presiones de neumáticos (psi)</h3>
             <div className="space-y-2">
               {presiones.map((p, idx) => (
                 <div key={p.posicion} className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="flex-1 min-w-[140px] text-slate-600">{p.posicion}</span>
+                  <span className="flex-1 min-w-[140px] text-neutral-600">{p.posicion}</span>
                   <Input
                     className="w-[74px] text-center"
                     placeholder="Rec."
@@ -167,14 +167,14 @@ export function ChecklistForm({
               ))}
             </div>
 
-            <h3 className="text-sm font-semibold text-slate-700 mt-6 mb-3">Revisiones generales</h3>
+            <h3 className="text-sm font-semibold text-ink mt-6 mb-3">Revisiones generales</h3>
             <div className="space-y-3">
               {items.map((item, idx) => (
-                <div key={item.nombre} className="border-b border-slate-100 pb-2">
+                <div key={item.nombre} className="border-b border-ink/10 pb-2">
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                     <div>
-                      <p className="text-sm font-medium text-slate-800">{item.nombre}</p>
-                      {item.ayuda && <p className="text-[11.5px] text-slate-400">{item.ayuda}</p>}
+                      <p className="text-sm font-medium text-ink">{item.nombre}</p>
+                      {item.ayuda && <p className="text-[11.5px] text-neutral-400">{item.ayuda}</p>}
                     </div>
                     <TriEstado
                       valor={item.estado}
@@ -194,7 +194,7 @@ export function ChecklistForm({
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-slate-700 mb-3">Mapa de carrocería</h3>
+            <h3 className="text-sm font-semibold text-ink mb-3">Mapa de carrocería</h3>
             <MapaCarroceria
               danos={danos}
               tipoActivo={tipoActivo}
@@ -204,7 +204,7 @@ export function ChecklistForm({
               soloLectura={soloLectura}
             />
 
-            <h3 className="text-sm font-semibold text-slate-700 mt-6 mb-2">Observaciones generales</h3>
+            <h3 className="text-sm font-semibold text-ink mt-6 mb-2">Observaciones generales</h3>
             <Textarea
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
@@ -214,8 +214,8 @@ export function ChecklistForm({
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-          <p className="text-sm text-slate-500">
+        <div className="flex items-center justify-between border-t border-ink/16 pt-4">
+          <p className="text-sm text-neutral-500">
             {revisados} de {items.length + presiones.length} puntos revisados · {conCambio} con cambio recomendado ·{" "}
             {conVidaUtil} con vida útil
           </p>
@@ -225,7 +225,7 @@ export function ChecklistForm({
             </Button>
           )}
         </div>
-        {error && <p className="text-sm text-green-700">{error}</p>}
+        {error && <p className="text-sm text-accent-text">{error}</p>}
       </fieldset>
     </form>
   );

@@ -17,8 +17,8 @@ export default async function EditarServicioPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Editar servicio</h1>
-      <ServicioForm servicio={servicio} />
+      <h1 className="text-2xl font-bold text-ink mb-6">Editar servicio</h1>
+      <ServicioForm servicio={{ ...servicio, precioBase: Number(servicio.precioBase) }} />
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default async function EditarEspecificacionPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Editar ficha técnica</h1>
+      <h1 className="text-2xl font-bold text-ink mb-6">Editar ficha técnica</h1>
       <EspecificacionForm especificacion={especificacion} />
     </div>
   );

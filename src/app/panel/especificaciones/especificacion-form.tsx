@@ -60,7 +60,7 @@ export function EspecificacionForm({
       <Field label="Notas (opcional)">
         <Textarea name="notas" rows={3} defaultValue={especificacion?.notas ?? ""} />
       </Field>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#a63327]">{error}</p>}
       <Button type="submit" disabled={pending}>
         {pending ? "Guardando..." : especificacion ? "Guardar cambios" : "Crear ficha"}
       </Button>

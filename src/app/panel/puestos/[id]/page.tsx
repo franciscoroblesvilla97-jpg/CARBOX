@@ -20,8 +20,11 @@ export default async function EditarPuestoPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Editar puesto</h1>
-      <PuestoForm puesto={puesto} servicios={servicios} />
+      <h1 className="text-2xl font-bold text-ink mb-6">Editar puesto</h1>
+      <PuestoForm
+        puesto={{ ...puesto, servicios: puesto.servicios.map((s) => ({ id: s.id, nombre: s.nombre })) }}
+        servicios={servicios.map((s) => ({ id: s.id, nombre: s.nombre }))}
+      />
     </div>
   );
 }

@@ -1,13 +1,18 @@
 import { InputHTMLAttributes, LabelHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, forwardRef } from "react";
 
 export function Label(props: LabelHTMLAttributes<HTMLLabelElement>) {
-  return <label className="block text-sm font-medium text-slate-700 mb-1" {...props} />;
+  return (
+    <label
+      className="block font-[family-name:var(--font-barlow-condensed)] font-semibold text-[11px] tracking-[0.1em] uppercase text-neutral-600 mb-1"
+      {...props}
+    />
+  );
 }
 
 const baseControl =
-  "w-full rounded-md border bg-white text-slate-900 px-3 py-2 text-sm focus:outline-none focus:ring-2";
-const validClasses = "border-slate-300 focus:ring-green-500";
-const invalidClasses = "border-red-500 focus:ring-red-500";
+  "w-full border bg-paper text-ink px-3 py-2 text-sm font-[family-name:var(--font-barlow)] focus:outline-2 focus:outline-accent focus:outline-offset-2 focus:border-accent";
+const validClasses = "border-ink/24";
+const invalidClasses = "border-[#a63327] focus:outline-[#a63327]";
 
 export function Input({
   className = "",
@@ -46,7 +51,7 @@ export function Field({
     <div className="mb-4">
       <Label>{label}</Label>
       {children}
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-sm text-[#a63327]">{error}</p>}
     </div>
   );
 }

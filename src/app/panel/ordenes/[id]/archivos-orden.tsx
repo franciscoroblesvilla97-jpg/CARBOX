@@ -21,24 +21,24 @@ export function ArchivosOrden({ ordenId, archivos }: { ordenId: string; archivos
     <div>
       <ul className="space-y-2 mb-3">
         {archivos.map((archivo) => (
-          <li key={archivo.id} className="flex items-center justify-between gap-3 text-sm border-b border-slate-100 pb-2">
-            <a href={archivo.url} target="_blank" rel="noopener noreferrer" className="text-green-700 hover:underline">
+          <li key={archivo.id} className="flex items-center justify-between gap-3 text-sm border-b border-ink/10 pb-2">
+            <a href={archivo.url} target="_blank" rel="noopener noreferrer" className="text-accent-text hover:underline">
               {archivo.nombre}
             </a>
-            <div className="flex items-center gap-3 text-xs text-slate-400">
+            <div className="flex items-center gap-3 text-xs text-neutral-400">
               <span>
                 {formatFecha(archivo.createdAt)}
                 {archivo.subidoPor && ` · ${archivo.subidoPor.nombre}`}
               </span>
               <form action={eliminarArchivoOrden.bind(null, archivo.id)}>
-                <button type="submit" className="text-red-600 hover:underline">
+                <button type="submit" className="text-[#a63327] hover:underline">
                   Eliminar
                 </button>
               </form>
             </div>
           </li>
         ))}
-        {archivos.length === 0 && <p className="text-sm text-slate-400">Sin archivos adjuntos.</p>}
+        {archivos.length === 0 && <p className="text-sm text-neutral-400">Sin archivos adjuntos.</p>}
       </ul>
 
       <form
@@ -60,8 +60,8 @@ export function ArchivosOrden({ ordenId, archivos }: { ordenId: string; archivos
           {pending ? "Subiendo..." : "Subir"}
         </Button>
       </form>
-      {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
-      <p className="text-xs text-slate-400 mt-1">PDF o imagen, máx. 10 MB. Ej: informe de alineación.</p>
+      {error && <p className="text-sm text-[#a63327] mt-1">{error}</p>}
+      <p className="text-xs text-neutral-400 mt-1">PDF o imagen, máx. 10 MB. Ej: informe de alineación.</p>
     </div>
   );
 }

@@ -92,7 +92,7 @@ export default async function ReportesPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Reportes</h1>
+      <h1 className="text-2xl font-bold text-ink mb-6">Reportes</h1>
 
       <form className="flex items-end gap-3 mb-8">
         <Field label="Desde">
@@ -118,43 +118,43 @@ export default async function ReportesPage({
       </form>
 
       <div className="grid sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-slate-500">Ventas servicios</p>
-          <p className="text-xl font-bold text-slate-900">{formatCLP(ventasServicios)}</p>
+        <div className="bg-paper border border-ink/12 p-4">
+          <p className="text-sm text-neutral-500">Ventas servicios</p>
+          <p className="text-xl font-bold text-ink">{formatCLP(ventasServicios)}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-slate-500">Ventas productos</p>
-          <p className="text-xl font-bold text-slate-900">{formatCLP(ventasProductos)}</p>
+        <div className="bg-paper border border-ink/12 p-4">
+          <p className="text-sm text-neutral-500">Ventas productos</p>
+          <p className="text-xl font-bold text-ink">{formatCLP(ventasProductos)}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-slate-500">
+        <div className="bg-paper border border-ink/12 p-4">
+          <p className="text-sm text-neutral-500">
             Total ({ordenesFiltradas.length} {ordenesFiltradas.length === 1 ? "orden" : "órdenes"}
             {filtroEstado === "TODAS" ? "" : ` ${etiquetaEstado[filtroEstado].toLowerCase()}${ordenesFiltradas.length === 1 ? "" : "s"}`}
             )
           </p>
-          <p className="text-xl font-bold text-green-700">{formatCLP(ventasTotal)}</p>
+          <p className="text-xl font-bold text-accent-text">{formatCLP(ventasTotal)}</p>
         </div>
       </div>
 
       <div className="grid sm:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-slate-500">Costo materiales (en órdenes)</p>
-          <p className="text-xl font-bold text-slate-900">{formatCLP(costoMateriales)}</p>
+        <div className="bg-paper border border-ink/12 p-4">
+          <p className="text-sm text-neutral-500">Costo materiales (en órdenes)</p>
+          <p className="text-xl font-bold text-ink">{formatCLP(costoMateriales)}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-slate-500">Margen (ventas − costo materiales)</p>
-          <p className={`text-xl font-bold ${margen >= 0 ? "text-green-700" : "text-red-700"}`}>{formatCLP(margen)}</p>
+        <div className="bg-paper border border-ink/12 p-4">
+          <p className="text-sm text-neutral-500">Margen (ventas − costo materiales)</p>
+          <p className={`text-xl font-bold ${margen >= 0 ? "text-accent-text" : "text-[#a63327]"}`}>{formatCLP(margen)}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-slate-500">Gasto en compras de stock</p>
-          <p className="text-xl font-bold text-slate-900">{formatCLP(gastoCompras)}</p>
+        <div className="bg-paper border border-ink/12 p-4">
+          <p className="text-sm text-neutral-500">Gasto en compras de stock</p>
+          <p className="text-xl font-bold text-ink">{formatCLP(gastoCompras)}</p>
         </div>
       </div>
 
-      <h2 className="text-lg font-semibold text-slate-900 mb-3">Órdenes incluidas en este período</h2>
-      <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+      <h2 className="text-lg font-semibold text-ink mb-3">Órdenes incluidas en este período</h2>
+      <div className="bg-paper border border-ink/12 overflow-hidden mb-8">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+          <thead className="bg-surface text-left text-neutral-500">
             <tr>
               <th className="px-4 py-3">OT</th>
               <th className="px-4 py-3">Vehículo</th>
@@ -164,15 +164,15 @@ export default async function ReportesPage({
               <th className="px-4 py-3 text-right">Total</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-ink/10">
             {ordenesFiltradas.map((orden) => {
               const totalOrden =
                 orden.servicios.reduce((a, l) => a + Number(l.precioCobrado) * l.cantidad, 0) +
                 orden.productos.reduce((a, l) => a + Number(l.precioUnitario) * l.cantidad, 0);
               return (
-                <tr key={orden.id} className="hover:bg-slate-50">
+                <tr key={orden.id} className="hover:bg-surface">
                   <td className="px-4 py-3">
-                    <Link href={`/panel/ordenes/${orden.id}`} className="text-green-700 font-medium hover:underline">
+                    <Link href={`/panel/ordenes/${orden.id}`} className="text-accent-text font-medium hover:underline">
                       #{orden.numero}
                     </Link>
                   </td>
@@ -181,14 +181,14 @@ export default async function ReportesPage({
                   <td className="px-4 py-3">
                     <Badge color={colorEstado[orden.estado]}>{etiquetaEstado[orden.estado]}</Badge>
                   </td>
-                  <td className="px-4 py-3 text-slate-500">{formatFechaCorta(orden.fechaIngreso)}</td>
+                  <td className="px-4 py-3 text-neutral-500">{formatFechaCorta(orden.fechaIngreso)}</td>
                   <td className="px-4 py-3 text-right font-medium">{formatCLP(totalOrden)}</td>
                 </tr>
               );
             })}
             {ordenesFiltradas.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-neutral-400">
                   No hay órdenes que calcen con este filtro.
                 </td>
               </tr>
@@ -197,16 +197,16 @@ export default async function ReportesPage({
         </table>
       </div>
 
-      <h2 className="text-lg font-semibold text-slate-900 mb-3">Productos más consumidos</h2>
-      <div className="bg-white rounded-lg shadow overflow-hidden mb-4">
+      <h2 className="text-lg font-semibold text-ink mb-3">Productos más consumidos</h2>
+      <div className="bg-paper border border-ink/12 overflow-hidden mb-4">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+          <thead className="bg-surface text-left text-neutral-500">
             <tr>
               <th className="px-4 py-3">Producto</th>
               <th className="px-4 py-3">Cantidad consumida</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-ink/10">
             {consumo.map((c) => {
               const producto = productos.find((p) => p.id === c.productoId);
               return (
@@ -220,7 +220,7 @@ export default async function ReportesPage({
             })}
             {consumo.length === 0 && (
               <tr>
-                <td colSpan={2} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={2} className="px-4 py-6 text-center text-neutral-400">
                   Sin movimientos de salida en el período.
                 </td>
               </tr>
@@ -229,7 +229,7 @@ export default async function ReportesPage({
         </table>
       </div>
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-neutral-400">
         Período: {formatFechaCorta(fechaDesde)} – {formatFechaCorta(fechaHasta)}
       </p>
     </div>

@@ -23,18 +23,18 @@ export default async function NuevaOrdenPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-1">Nueva orden de trabajo</h1>
-      <p className="text-sm text-slate-500 mb-6">
+      <h1 className="text-2xl font-bold text-ink mb-1">Nueva orden de trabajo</h1>
+      <p className="text-sm text-neutral-500 mb-6">
         ¿El vehículo no existe todavía?{" "}
-        <Link href="/panel/clientes/nuevo" className="text-green-700 hover:underline">
+        <Link href="/panel/clientes/nuevo" className="text-accent-text hover:underline">
           Crea el cliente y su vehículo primero
         </Link>
         .
       </p>
       <OrdenForm
         vehiculos={vehiculos}
-        servicios={servicios}
-        productos={productos}
+        servicios={servicios.map((s) => ({ ...s, precioBase: Number(s.precioBase) }))}
+        productos={productos.map((p) => ({ ...p, precioVenta: Number(p.precioVenta), costoUnitario: Number(p.costoUnitario) }))}
         trabajadores={trabajadores}
         puestos={puestosConServicioIds}
       />

@@ -17,7 +17,7 @@ export default async function EditarTrabajadorPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Editar trabajador</h1>
+      <h1 className="text-2xl font-bold text-ink mb-6">Editar trabajador</h1>
       <TrabajadorForm trabajador={trabajador} />
     </div>
   );

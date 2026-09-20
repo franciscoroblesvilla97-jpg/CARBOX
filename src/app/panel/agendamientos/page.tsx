@@ -28,7 +28,7 @@ export default async function AgendamientosPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-4">Solicitudes de agendamiento</h1>
+      <h1 className="text-2xl font-bold text-ink mb-4">Solicitudes de agendamiento</h1>
 
       <div className="flex gap-2 mb-6">
         {tabs.map((tab) => (
@@ -42,12 +42,12 @@ export default async function AgendamientosPage({
         ))}
       </div>
 
-      <div className="bg-white rounded-lg shadow divide-y divide-slate-100">
+      <div className="bg-paper border border-ink/12 divide-y divide-ink/10">
         {solicitudes.map((solicitud) => (
           <SolicitudRow key={solicitud.id} solicitud={solicitud} />
         ))}
         {solicitudes.length === 0 && (
-          <p className="px-4 py-6 text-center text-slate-400 text-sm">No hay solicitudes en este estado.</p>
+          <p className="px-4 py-6 text-center text-neutral-400 text-sm">No hay solicitudes en este estado.</p>
         )}
       </div>
     </div>

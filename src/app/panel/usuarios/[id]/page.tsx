@@ -24,10 +24,10 @@ export default async function EditarUsuarioPage({
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Editar usuario</h1>
+      <h1 className="text-2xl font-bold text-ink mb-6">Editar usuario</h1>
       <UsuarioForm usuario={usuario} esUsuarioActual={user.id === usuario.id} trabajadores={trabajadores} />
 
-      <h2 className="text-lg font-semibold text-slate-900 mt-10 mb-4">Contraseña</h2>
+      <h2 className="text-lg font-semibold text-ink mt-10 mb-4">Contraseña</h2>
       <PasswordForm usuarioId={usuario.id} />
     </div>
   );

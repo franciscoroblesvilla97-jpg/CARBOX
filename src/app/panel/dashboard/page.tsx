@@ -100,61 +100,61 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-2">Hola, {user.nombre}</h1>
-      <p className="text-slate-500 mb-6">Bienvenido al panel de Carbox.</p>
+      <h1 className="text-2xl font-bold text-ink mb-2">Hola, {user.nombre}</h1>
+      <p className="text-neutral-500 mb-6">Bienvenido al panel de Carbox.</p>
 
       <div className="grid grid-cols-4 gap-3 mb-8">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-slate-500 mb-1">Ayer</p>
-          <p className="text-2xl font-bold text-slate-900">
-            {ayerCerradas} <span className="text-sm font-normal text-slate-500">de {ordenesAyer.length} cerradas</span>
+        <div className="bg-paper border border-ink/12 p-4">
+          <p className="text-sm text-neutral-500 mb-1">Ayer</p>
+          <p className="text-2xl font-bold text-ink">
+            {ayerCerradas} <span className="text-sm font-normal text-neutral-500">de {ordenesAyer.length} cerradas</span>
           </p>
           {ayerAbiertas.length > 0 && (
             <p className="text-sm text-yellow-700 mt-1">{ayerAbiertas.length} quedaron abiertas</p>
           )}
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-slate-500 mb-1">Hoy</p>
-          <p className="text-2xl font-bold text-slate-900">
-            {ordenesHoy.length} <span className="text-sm font-normal text-slate-500">órdenes</span>
+        <div className="bg-paper border border-ink/12 p-4">
+          <p className="text-sm text-neutral-500 mb-1">Hoy</p>
+          <p className="text-2xl font-bold text-ink">
+            {ordenesHoy.length} <span className="text-sm font-normal text-neutral-500">órdenes</span>
           </p>
           {duracionTotalHoy > 0 && (
-            <p className="text-sm text-slate-500 mt-1">≈{formatDuracion(duracionTotalHoy)} de trabajo estimado</p>
+            <p className="text-sm text-neutral-500 mt-1">≈{formatDuracion(duracionTotalHoy)} de trabajo estimado</p>
           )}
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-slate-500 mb-1">Mañana</p>
-          <p className="text-2xl font-bold text-slate-900">
-            {ordenesManana.length} <span className="text-sm font-normal text-slate-500">agendadas</span>
+        <div className="bg-paper border border-ink/12 p-4">
+          <p className="text-sm text-neutral-500 mb-1">Mañana</p>
+          <p className="text-2xl font-bold text-ink">
+            {ordenesManana.length} <span className="text-sm font-normal text-neutral-500">agendadas</span>
           </p>
           {ordenesManana.length > 0 && (
-            <p className="text-sm text-slate-500 mt-1">Primera a las {formatHora(ordenesManana[0].fechaProgramada)}</p>
+            <p className="text-sm text-neutral-500 mt-1">Primera a las {formatHora(ordenesManana[0].fechaProgramada)}</p>
           )}
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-slate-500 mb-1">Materiales</p>
-          <p className="text-2xl font-bold text-slate-900">
+        <div className="bg-paper border border-ink/12 p-4">
+          <p className="text-sm text-neutral-500 mb-1">Materiales</p>
+          <p className="text-2xl font-bold text-ink">
             {materialesConfirmados}
-            <span className="text-sm font-normal text-slate-500">/{materialesNecesarios}</span>
+            <span className="text-sm font-normal text-neutral-500">/{materialesNecesarios}</span>
           </p>
           {materialesNecesarios === 0 ? (
-            <p className="text-sm text-slate-500 mt-1">Sin materiales asignados hoy.</p>
+            <p className="text-sm text-neutral-500 mt-1">Sin materiales asignados hoy.</p>
           ) : materialesEnRiesgo.length > 0 ? (
-            <p className="text-sm text-red-700 mt-1">Comprar con urgencia</p>
+            <p className="text-sm text-[#a63327] mt-1">Comprar con urgencia</p>
           ) : (
-            <p className="text-sm text-green-700 mt-1">Cubierto</p>
+            <p className="text-sm text-accent-text mt-1">Cubierto</p>
           )}
         </div>
       </div>
 
       {materialesEnRiesgo.length > 0 && (
         <>
-          <h2 className="text-lg font-semibold text-slate-900 mb-3">Materiales que faltan para hoy</h2>
-          <div className="bg-white rounded-lg shadow divide-y divide-slate-100 mb-8">
+          <h2 className="text-lg font-semibold text-ink mb-3">Materiales que faltan para hoy</h2>
+          <div className="bg-paper border border-ink/12 divide-y divide-ink/10 mb-8">
             {materialesEnRiesgo.map((m) => (
               <div key={m.nombre} className="flex items-center justify-between px-4 py-3">
-                <span className="font-medium text-slate-900">{m.nombre}</span>
-                <span className="text-sm text-red-700">
+                <span className="font-medium text-ink">{m.nombre}</span>
+                <span className="text-sm text-[#a63327]">
                   Faltan {m.faltante} {m.unidad}
                 </span>
               </div>
@@ -165,19 +165,19 @@ export default async function DashboardPage() {
 
       {ayerAbiertas.length > 0 && (
         <>
-          <h2 className="text-lg font-semibold text-slate-900 mb-3">Ayer quedó pendiente</h2>
-          <div className="bg-white rounded-lg shadow divide-y divide-slate-100 mb-8">
+          <h2 className="text-lg font-semibold text-ink mb-3">Ayer quedó pendiente</h2>
+          <div className="bg-paper border border-ink/12 divide-y divide-ink/10 mb-8">
             {ayerAbiertas.map((orden) => (
               <Link
                 key={orden.id}
                 href={`/panel/ordenes/${orden.id}`}
-                className="flex items-center justify-between px-4 py-3 hover:bg-slate-50"
+                className="flex items-center justify-between px-4 py-3 hover:bg-surface"
               >
                 <div>
-                  <p className="font-medium text-slate-900">
+                  <p className="font-medium text-ink">
                     {orden.vehiculo.patente} — {orden.vehiculo.cliente.nombre}
                   </p>
-                  <p className="text-xs text-slate-400">OT #{orden.numero}</p>
+                  <p className="text-xs text-neutral-400">OT #{orden.numero}</p>
                 </div>
                 <Badge color={estadoColor[orden.estado]}>{estadoLabel[orden.estado]}</Badge>
               </Link>
@@ -186,23 +186,23 @@ export default async function DashboardPage() {
         </>
       )}
 
-      <h2 className="text-lg font-semibold text-slate-900 mb-3">Agenda de hoy</h2>
+      <h2 className="text-lg font-semibold text-ink mb-3">Agenda de hoy</h2>
       <AgendaCalendario ordenes={ordenesHoy} puestos={puestos} />
 
-      <h2 className="text-lg font-semibold text-slate-900 mb-3">Vista previa de mañana</h2>
-      <div className="bg-white rounded-lg shadow divide-y divide-slate-100 mb-8">
+      <h2 className="text-lg font-semibold text-ink mb-3">Vista previa de mañana</h2>
+      <div className="bg-paper border border-ink/12 divide-y divide-ink/10 mb-8">
         {ordenesManana.map((orden) => (
           <Link
             key={orden.id}
             href={`/panel/ordenes/${orden.id}`}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50"
+            className="flex items-center gap-3 px-4 py-3 hover:bg-surface"
           >
-            <span className="text-sm text-slate-500 w-12 shrink-0">{formatHora(orden.fechaProgramada)}</span>
+            <span className="text-sm text-neutral-500 w-12 shrink-0">{formatHora(orden.fechaProgramada)}</span>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-slate-900 truncate">
+              <p className="font-medium text-ink truncate">
                 {orden.vehiculo.patente} — {orden.vehiculo.cliente.nombre}
               </p>
-              <p className="text-xs text-slate-500 truncate">
+              <p className="text-xs text-neutral-500 truncate">
                 {orden.servicios.map((s) => s.servicio?.nombre ?? s.nombrePersonalizado).join(", ") || "Sin servicios"}
                 {duracionOrden(orden.servicios) > 0 && ` · ${duracionOrden(orden.servicios)} min`}
                 {" · "}
@@ -212,29 +212,29 @@ export default async function DashboardPage() {
           </Link>
         ))}
         {ordenesManana.length === 0 && (
-          <p className="px-4 py-6 text-center text-slate-400 text-sm">Aún no hay nada agendado para mañana.</p>
+          <p className="px-4 py-6 text-center text-neutral-400 text-sm">Aún no hay nada agendado para mañana.</p>
         )}
       </div>
 
       <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-lg font-semibold text-slate-900">Productos con bajo stock</h2>
+        <h2 className="text-lg font-semibold text-ink">Productos con bajo stock</h2>
         {productosBajoStock.length > 0 && <Badge color="red">{productosBajoStock.length}</Badge>}
       </div>
-      <div className="bg-white rounded-lg shadow divide-y divide-slate-100">
+      <div className="bg-paper border border-ink/12 divide-y divide-ink/10">
         {productosBajoStock.map((p) => (
           <Link
             key={p.id}
             href={`/panel/inventario/${p.id}`}
-            className="flex items-center justify-between px-4 py-3 hover:bg-slate-50"
+            className="flex items-center justify-between px-4 py-3 hover:bg-surface"
           >
-            <span className="font-medium text-slate-900">{p.nombre}</span>
-            <span className="text-sm text-slate-500">
+            <span className="font-medium text-ink">{p.nombre}</span>
+            <span className="text-sm text-neutral-500">
               {p.stockActual} {p.unidad} (mínimo {p.stockMinimo})
             </span>
           </Link>
         ))}
         {productosBajoStock.length === 0 && (
-          <p className="px-4 py-6 text-center text-slate-400 text-sm">Todo el stock está por encima del mínimo. 👍</p>
+          <p className="px-4 py-6 text-center text-neutral-400 text-sm">Todo el stock está por encima del mínimo. 👍</p>
         )}
       </div>
     </div>

@@ -51,21 +51,21 @@ export function UsuarioForm({
               </option>
             ))}
           </Select>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-neutral-400">
             Este técnico verá solo las órdenes asignadas a este trabajador, sin precios ni valores.
           </p>
         </Field>
       )}
-      <label className="flex items-center gap-2 text-sm text-slate-700 mb-4">
+      <label className="flex items-center gap-2 text-sm text-ink mb-4">
         <input type="checkbox" name="activo" defaultChecked={usuario?.activo ?? true} />
         Usuario activo (puede iniciar sesión)
       </label>
       {esUsuarioActual && (
-        <p className="text-xs text-slate-400 -mt-2 mb-4">
+        <p className="text-xs text-neutral-400 -mt-2 mb-4">
           No puedes cambiar tu propio rol ni desactivar tu propia cuenta.
         </p>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#a63327]">{error}</p>}
       <Button type="submit" disabled={pending}>
         {pending ? "Guardando..." : usuario ? "Guardar cambios" : "Crear usuario"}
       </Button>

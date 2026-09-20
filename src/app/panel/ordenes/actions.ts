@@ -176,13 +176,28 @@ export async function agregarServicioAOrden(ordenId: string, _prevState: string 
 }
 
 export async function agregarMaterialAOrden(ordenId: string, _prevState: string | undefined, formData: FormData) {
-  const user = await requireSession();
+  const user = await requireAccesoOrden(ordenId);
   await requireOrdenEditable(ordenId);
 
   const modo = formData.get("modo");
   const cantidad = Number(formData.get("cantidad")) || 1;
 
-  if (modo === "inventario") {
+  if (modo === "pendiente") {
+    const nombre = formData.get("nombrePersonalizado");
+    if (typeof nombre !== "string" || !nombre.trim()) {
+      return "Escribe el nombre del repuesto";
+    }
+    await prisma.ordenTrabajoProducto.create({
+      data: {
+        ordenTrabajoId: ordenId,
+        nombrePersonalizado: nombre.trim(),
+        cantidad,
+        precioUnitario: 0,
+        costoUnitario: 0,
+        pendienteRevision: true,
+      },
+    });
+  } else if (modo === "inventario") {
     const productoId = formData.get("productoId");
     if (typeof productoId !== "string" || !productoId) {
       return "Selecciona un producto del inventario";
@@ -411,6 +426,37 @@ export async function subirArchivoOrden(ordenId: string, _prevState: string | un
       url: blob.url,
       tipo: archivo.type,
       subidoPorId: user.rol === "TECNICO" ? user.trabajadorId : null,
+    },
+  });
+
+  revalidatePath(`/panel/ordenes/${ordenId}`);
+  revalidatePath(`/panel/ordenes/${ordenId}/informe`);
+  return undefined;
+}
+
+export async function fijarPrecioMaterialPendiente(
+  ordenId: string,
+  lineaId: string,
+  _prevState: string | undefined,
+  formData: FormData
+) {
+  await requireRole(["ADMIN", "EMPLEADO"]);
+
+  const productoId = formData.get("productoId");
+  const costo = Number(formData.get("costoUnitario")) || 0;
+  const precio = Number(formData.get("precioUnitario"));
+
+  if (!Number.isFinite(precio) || precio < 0) {
+    return "Precio inválido";
+  }
+
+  await prisma.ordenTrabajoProducto.update({
+    where: { id: lineaId },
+    data: {
+      productoId: typeof productoId === "string" && productoId ? productoId : null,
+      costoUnitario: costo,
+      precioUnitario: precio,
+      pendienteRevision: false,
     },
   });
 

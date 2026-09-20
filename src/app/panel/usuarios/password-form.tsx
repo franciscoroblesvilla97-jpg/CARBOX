@@ -15,7 +15,7 @@ export function PasswordForm({ usuarioId }: { usuarioId: string }) {
         <Input type="password" name="password" minLength={6} required />
       </Field>
       {mensaje && (
-        <p className={`text-sm ${mensaje === "Contraseña actualizada" ? "text-green-700" : "text-red-600"}`}>
+        <p className={`text-sm ${mensaje === "Contraseña actualizada" ? "text-accent-text" : "text-[#a63327]"}`}>
           {mensaje}
         </p>
       )}

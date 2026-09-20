@@ -33,12 +33,19 @@ export function Sidebar({ rol, nombre }: { rol: Rol; nombre: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-60 shrink-0 bg-slate-900 text-slate-100 min-h-screen flex flex-col print:hidden">
-      <div className="px-5 py-5 border-b border-slate-800">
-        <p className="text-lg font-bold">Carbox</p>
-        <p className="text-xs text-slate-400">
-          {nombre} · {etiquetaRol[rol]}
-        </p>
+    <aside className="w-60 shrink-0 bg-ink text-paper min-h-screen flex flex-col print:hidden font-[family-name:var(--font-barlow)]">
+      <div className="px-5 py-5 border-b border-paper/16 flex items-center gap-2">
+        <span className="flex items-center justify-center w-[27px] h-[27px] bg-accent font-[family-name:var(--font-barlow-condensed)] font-bold text-[17px] shrink-0">
+          C
+        </span>
+        <div>
+          <p className="font-[family-name:var(--font-barlow-condensed)] font-bold text-[16px] tracking-[0.14em] uppercase">
+            Carbox
+          </p>
+          <p className="text-[11px] text-neutral-400">
+            {nombre} · {etiquetaRol[rol]}
+          </p>
+        </div>
       </div>
       <nav className="flex-1 py-4">
         {navItems
@@ -49,8 +56,8 @@ export function Sidebar({ rol, nombre }: { rol: Rol; nombre: string }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`block px-5 py-2.5 text-sm ${
-                  active ? "bg-green-600 text-white" : "text-slate-300 hover:bg-slate-800"
+                className={`block px-5 py-2.5 text-[14px] tracking-[0.02em] ${
+                  active ? "bg-accent text-paper" : "text-neutral-300 hover:bg-paper/8"
                 }`}
               >
                 {item.label}
@@ -58,8 +65,8 @@ export function Sidebar({ rol, nombre }: { rol: Rol; nombre: string }) {
             );
           })}
       </nav>
-      <form action={signOutAction} className="p-4 border-t border-slate-800">
-        <button type="submit" className="text-sm text-slate-400 hover:text-white">
+      <form action={signOutAction} className="p-4 border-t border-paper/16">
+        <button type="submit" className="text-[13px] text-neutral-400 hover:text-paper">
           Cerrar sesión
         </button>
       </form>

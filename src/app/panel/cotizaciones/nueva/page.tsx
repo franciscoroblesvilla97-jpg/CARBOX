@@ -9,8 +9,11 @@ export default async function NuevaCotizacionPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Nueva cotización</h1>
-      <CotizacionForm servicios={servicios} productos={productos} />
+      <h1 className="text-2xl font-bold text-ink mb-6">Nueva cotización</h1>
+      <CotizacionForm
+        servicios={servicios.map((s) => ({ ...s, precioBase: Number(s.precioBase) }))}
+        productos={productos.map((p) => ({ ...p, precioVenta: Number(p.precioVenta), costoUnitario: Number(p.costoUnitario) }))}
+      />
     </div>
   );
 }

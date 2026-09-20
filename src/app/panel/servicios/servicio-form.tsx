@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/input";
 import type { Servicio } from "@prisma/client";
 
-export function ServicioForm({ servicio }: { servicio?: Servicio }) {
+type ServicioPlano = Omit<Servicio, "precioBase"> & { precioBase: number };
+
+export function ServicioForm({ servicio }: { servicio?: ServicioPlano }) {
   const action = servicio ? actualizarServicio.bind(null, servicio.id) : crearServicio;
   const [error, formAction, pending] = useActionState(action, undefined);
 
@@ -33,11 +35,11 @@ export function ServicioForm({ servicio }: { servicio?: Servicio }) {
           />
         </Field>
       </div>
-      <label className="flex items-center gap-2 text-sm text-slate-700 mb-4">
+      <label className="flex items-center gap-2 text-sm text-ink mb-4">
         <input type="checkbox" name="activo" defaultChecked={servicio?.activo ?? true} />
         Servicio activo (visible en el sitio y disponible para órdenes)
       </label>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#a63327]">{error}</p>}
       <Button type="submit" disabled={pending}>
         {pending ? "Guardando..." : servicio ? "Guardar cambios" : "Crear servicio"}
       </Button>

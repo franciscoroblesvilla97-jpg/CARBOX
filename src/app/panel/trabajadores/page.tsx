@@ -11,7 +11,7 @@ export default async function TrabajadoresPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Trabajadores</h1>
+        <h1 className="text-2xl font-bold text-ink">Trabajadores</h1>
         {user.rol === "ADMIN" && (
           <Link href="/panel/trabajadores/nuevo">
             <Button>Nuevo trabajador</Button>
@@ -19,21 +19,21 @@ export default async function TrabajadoresPage() {
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow divide-y divide-slate-100">
+      <div className="bg-paper border border-ink/12 divide-y divide-ink/10">
         {trabajadores.map((trabajador) => (
           <div key={trabajador.id} className="flex items-center justify-between px-4 py-3">
-            <p className="font-medium text-slate-900">
+            <p className="font-medium text-ink">
               {trabajador.nombre} {!trabajador.activo && <Badge color="gray">Inactivo</Badge>}
             </p>
             {user.rol === "ADMIN" && (
-              <Link href={`/panel/trabajadores/${trabajador.id}`} className="text-green-700 text-sm hover:underline">
+              <Link href={`/panel/trabajadores/${trabajador.id}`} className="text-accent-text text-sm hover:underline">
                 Editar
               </Link>
             )}
           </div>
         ))}
         {trabajadores.length === 0 && (
-          <p className="px-4 py-6 text-center text-slate-400 text-sm">Aún no hay trabajadores registrados.</p>
+          <p className="px-4 py-6 text-center text-neutral-400 text-sm">Aún no hay trabajadores registrados.</p>
         )}
       </div>
     </div>

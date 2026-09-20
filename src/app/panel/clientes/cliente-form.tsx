@@ -25,7 +25,7 @@ export function ClienteForm({ cliente }: { cliente?: Cliente }) {
       <Field label="RUT (opcional)">
         <Input name="rut" defaultValue={cliente?.rut ?? ""} />
       </Field>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#a63327]">{error}</p>}
       <Button type="submit" disabled={pending}>
         {pending ? "Guardando..." : cliente ? "Guardar cambios" : "Crear cliente"}
       </Button>

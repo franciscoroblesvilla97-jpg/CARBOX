@@ -10,7 +10,16 @@ import type { Servicio, Producto } from "@prisma/client";
 
 const FILAS_INICIALES = 3;
 
-export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]; productos: Producto[] }) {
+type ServicioPlano = Omit<Servicio, "precioBase"> & { precioBase: number };
+type ProductoPlano = Omit<Producto, "precioVenta" | "costoUnitario"> & { precioVenta: number; costoUnitario: number };
+
+export function CotizacionForm({
+  servicios,
+  productos,
+}: {
+  servicios: ServicioPlano[];
+  productos: ProductoPlano[];
+}) {
   const [error, formAction, pending] = useActionState(crearCotizacion, undefined);
 
   const [filasServicio, setFilasServicio] = useState<number[]>(() =>
@@ -53,17 +62,17 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
       </div>
 
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-2">Servicios del catálogo</h2>
-        <p className="text-xs text-slate-400 mb-2">El precio viene precargado desde el catálogo, pero puedes ajustarlo para esta cotización.</p>
-        <div className="bg-white rounded-md border border-slate-200 divide-y divide-slate-100">
+        <h2 className="text-sm font-semibold text-ink mb-2">Servicios del catálogo</h2>
+        <p className="text-xs text-neutral-400 mb-2">El precio viene precargado desde el catálogo, pero puedes ajustarlo para esta cotización.</p>
+        <div className="bg-paper border border-ink/16 divide-y divide-ink/10">
           {servicios.map((servicio) => (
             <div key={servicio.id} className="flex items-center justify-between gap-3 px-3 py-2">
               <div className="flex-1 min-w-0">
                 <input type="hidden" name="servicioId" value={servicio.id} />
-                <p className="text-sm font-medium text-slate-800 truncate">{servicio.nombre}</p>
+                <p className="text-sm font-medium text-ink truncate">{servicio.nombre}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-slate-400">$</span>
+                <span className="text-xs text-neutral-400">$</span>
                 <input
                   type="number"
                   name="servicioPrecio"
@@ -71,7 +80,7 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
                   step="1"
                   defaultValue={Number(servicio.precioBase)}
                   title="Precio a cobrar (editable)"
-                  className="w-28 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                  className="w-28 border border-ink/24 px-2 py-1 text-sm"
                 />
                 <input
                   type="number"
@@ -79,7 +88,7 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
                   min={0}
                   defaultValue={0}
                   title="Cantidad"
-                  className="w-16 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                  className="w-16 border border-ink/24 px-2 py-1 text-sm"
                 />
               </div>
             </div>
@@ -88,33 +97,33 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
       </div>
 
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-2">Servicios personalizados (opcional)</h2>
+        <h2 className="text-sm font-semibold text-ink mb-2">Servicios personalizados (opcional)</h2>
         <div className="space-y-2">
           {filasServicio.map((id) => (
             <div key={id} className="grid grid-cols-7 gap-2 items-center">
               <input
                 name="servicioNombrePersonalizado"
                 placeholder="Nombre del servicio"
-                className="col-span-3 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                className="col-span-3 border border-ink/24 px-2 py-1 text-sm"
               />
               <input
                 name="servicioPrecioPersonalizado"
                 type="number"
                 min={0}
                 placeholder="Precio"
-                className="col-span-2 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                className="col-span-2 border border-ink/24 px-2 py-1 text-sm"
               />
               <input
                 name="servicioCantidadPersonalizada"
                 type="number"
                 min={1}
                 defaultValue={1}
-                className="rounded-md border border-slate-300 px-2 py-1 text-sm"
+                className=" border border-ink/24 px-2 py-1 text-sm"
               />
               <button
                 type="button"
                 onClick={() => setFilasServicio((filas) => filas.filter((f) => f !== id))}
-                className="text-slate-400 hover:text-red-600 text-sm justify-self-end"
+                className="text-neutral-400 hover:text-[#a63327] text-sm justify-self-end"
                 aria-label="Quitar fila"
               >
                 ✕
@@ -127,28 +136,28 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
           onClick={() =>
             setFilasServicio((filas) => [...filas, siguienteIdServicio.current++])
           }
-          className="mt-2 text-sm font-medium text-green-700 hover:text-green-800"
+          className="mt-2 text-sm font-medium text-accent-text hover:text-accent-text"
         >
           + Agregar otro servicio
         </button>
       </div>
 
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-2">Productos / materiales de inventario</h2>
-        <div className="bg-white rounded-md border border-slate-200 divide-y divide-slate-100">
+        <h2 className="text-sm font-semibold text-ink mb-2">Productos / materiales de inventario</h2>
+        <div className="bg-paper border border-ink/16 divide-y divide-ink/10">
           {productos.map((producto) => (
             <div key={producto.id} className="flex items-center justify-between px-3 py-2">
               <div>
                 <input type="hidden" name="productoId" value={producto.id} />
-                <p className="text-sm font-medium text-slate-800">{producto.nombre}</p>
-                <p className="text-xs text-slate-500">{formatCLP(producto.precioVenta.toString())}</p>
+                <p className="text-sm font-medium text-ink">{producto.nombre}</p>
+                <p className="text-xs text-neutral-500">{formatCLP(producto.precioVenta.toString())}</p>
               </div>
               <input
                 type="number"
                 name="productoCantidad"
                 min={0}
                 defaultValue={0}
-                className="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                className="w-20 border border-ink/24 px-2 py-1 text-sm"
               />
             </div>
           ))}
@@ -156,40 +165,40 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
       </div>
 
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-2">Materiales externos (opcional)</h2>
+        <h2 className="text-sm font-semibold text-ink mb-2">Materiales externos (opcional)</h2>
         <div className="space-y-2">
           {filasMaterial.map((id) => (
             <div key={id} className="grid grid-cols-8 gap-2 items-center">
               <input
                 name="materialNombrePersonalizado"
                 placeholder="Nombre del material"
-                className="col-span-3 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                className="col-span-3 border border-ink/24 px-2 py-1 text-sm"
               />
               <input
                 name="materialCostoPersonalizado"
                 type="number"
                 min={0}
                 placeholder="Costo"
-                className="col-span-1 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                className="col-span-1 border border-ink/24 px-2 py-1 text-sm"
               />
               <input
                 name="materialPrecioPersonalizado"
                 type="number"
                 min={0}
                 placeholder="Precio a cobrar"
-                className="col-span-2 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                className="col-span-2 border border-ink/24 px-2 py-1 text-sm"
               />
               <input
                 name="materialCantidadPersonalizada"
                 type="number"
                 min={1}
                 defaultValue={1}
-                className="rounded-md border border-slate-300 px-2 py-1 text-sm"
+                className=" border border-ink/24 px-2 py-1 text-sm"
               />
               <button
                 type="button"
                 onClick={() => setFilasMaterial((filas) => filas.filter((f) => f !== id))}
-                className="text-slate-400 hover:text-red-600 text-sm justify-self-end"
+                className="text-neutral-400 hover:text-[#a63327] text-sm justify-self-end"
                 aria-label="Quitar fila"
               >
                 ✕
@@ -202,7 +211,7 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
           onClick={() =>
             setFilasMaterial((filas) => [...filas, siguienteIdMaterial.current++])
           }
-          className="mt-2 text-sm font-medium text-green-700 hover:text-green-800"
+          className="mt-2 text-sm font-medium text-accent-text hover:text-accent-text"
         >
           + Agregar otro material
         </button>
@@ -212,7 +221,7 @@ export function CotizacionForm({ servicios, productos }: { servicios: Servicio[]
         <Textarea name="observaciones" rows={3} />
       </Field>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#a63327]">{error}</p>}
       <Button type="submit" disabled={pending}>
         {pending ? "Creando cotización..." : "Crear cotización"}
       </Button>

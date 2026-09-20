@@ -207,6 +207,8 @@ model OrdenTrabajoProducto {
   cantidad            Int
   precioUnitario      Decimal // snapshot del precio de venta al momento de usarlo
   costoUnitario       Decimal      @default(0) // snapshot del costo al momento de usarlo, para calcular el gasto/margen
+  // El técnico registró este repuesto sin catálogo ni precio; el admin debe fijarlo.
+  pendienteRevision   Boolean      @default(false)
 }
 
 model SolicitudAgendamiento {

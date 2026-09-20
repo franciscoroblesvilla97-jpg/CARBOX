@@ -6,7 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/input";
 import type { Servicio } from "@prisma/client";
 
-export function AgregarServicioForm({ cotizacionId, servicios }: { cotizacionId: string; servicios: Servicio[] }) {
+type ServicioPlano = Omit<Servicio, "precioBase"> & { precioBase: number };
+
+export function AgregarServicioForm({
+  cotizacionId,
+  servicios,
+}: {
+  cotizacionId: string;
+  servicios: ServicioPlano[];
+}) {
   const action = agregarServicioACotizacion.bind(null, cotizacionId);
   const [error, formAction, pending] = useActionState(action, undefined);
   const [modo, setModo] = useState<"catalogo" | "personalizado">("catalogo");
@@ -75,7 +83,7 @@ export function AgregarServicioForm({ cotizacionId, servicios }: { cotizacionId:
         <Input name="cantidad" type="number" min={1} defaultValue={1} required />
       </Field>
 
-      {error && <p className="col-span-4 text-sm text-red-600">{error}</p>}
+      {error && <p className="col-span-4 text-sm text-[#a63327]">{error}</p>}
       <div className="col-span-4">
         <Button type="submit" variant="ghost" disabled={pending}>
           {pending ? "Agregando..." : "Agregar servicio"}
