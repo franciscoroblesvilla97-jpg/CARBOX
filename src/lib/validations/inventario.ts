@@ -20,10 +20,10 @@ export const productoSchema = z.object({
   costoUnitario: z.coerce.number().min(0, "Costo inválido"),
   stockActual: z.coerce.number().int().min(0, "Stock inválido"),
   stockMinimo: z.coerce.number().int().min(0, "Stock mínimo inválido"),
-  marca: z.string().optional().or(z.literal("")),
-  medida: z.string().optional().or(z.literal("")),
-  indice: z.string().optional().or(z.literal("")),
-  imagenUrl: z.string().optional().or(z.literal("")),
+  marca: z.string().nullish(),
+  medida: z.string().nullish(),
+  indice: z.string().nullish(),
+  imagenUrl: z.string().nullish(),
 });
 
 export const movimientoSchema = z.object({
