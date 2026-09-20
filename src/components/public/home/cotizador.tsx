@@ -38,6 +38,7 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
   const [modelo, setModelo] = useState("");
   const [anio, setAnio] = useState("");
   const [nombreContacto, setNombreContacto] = useState("");
+  const [email, setEmail] = useState("");
   const [digitosTelefono, setDigitosTelefono] = useState("");
   const telefono = digitosTelefono ? `+569${digitosTelefono}` : "";
 
@@ -107,7 +108,7 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
           <p className="mt-3 text-neutral-600">
             {state.pendiente
               ? "Esa hora se ocupó justo ahora. Recibimos tu solicitud y te contactaremos para coordinar otra."
-              : "Te enviamos la confirmación por WhatsApp. Te esperamos en Pedro de Valdivia 525."}
+                                      : `Te enviamos la confirmación por WhatsApp${state?.emailEnviado ? " y correo" : ""}. Te esperamos en Pedro de Valdivia 525.`}
           </p>
         </div>
       </section>
@@ -125,6 +126,7 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
         <input type="hidden" name="anio" value={anio} />
         <input type="hidden" name="nombreContacto" value={nombreContacto} />
         <input type="hidden" name="telefono" value={telefono} />
+        <input type="hidden" name="email" value={email} />
         <input type="hidden" name="fechaPreferida" value={dia && hora ? hora : ""} />
 
         {/* Barra de pasos */}
@@ -250,6 +252,7 @@ export function Cotizador({ servicios }: { servicios: ServicioLite[] }) {
                       />
                     </div>
                   </div>
+                  <div className="mt-[13.6px]"><CampoTexto label="Email (opcional)" value={email} onChange={setEmail} placeholder="tucorreo@ejemplo.com" type="email" /></div>
                 </div>
               </div>
             )}
